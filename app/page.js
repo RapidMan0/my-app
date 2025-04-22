@@ -4,6 +4,7 @@ import ContactInfo from "./components/ContactInfo";
 import About from "./components/About";
 import Services from "./components/Services";
 import "./globals.css";
+import PricingTabs from "./components/PricingTabs";
 
 export default function Page() {
   return (
@@ -13,6 +14,7 @@ export default function Page() {
       <ContactInfo />
       <About />
       <Services />
+      <PricingTabs />
     </>
   );
 }

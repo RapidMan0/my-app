@@ -7,7 +7,7 @@ const Home = () => (
             backgroundAttachment: 'fixed', // Параллакс-эффект
             backgroundPosition: 'center',
             backgroundSize: 'cover',
-            textShadow: '2px 4px 5px rgba(0, 0, 0, 1)',
+            textShadow: '2px 4px 15px rgba(0, 0, 0, 1)',
         }}
     >
         <div className=" p-8 rounded-lg space-y-3 mt-6 ml-4 sm:ml-6 md:ml-10 lg:ml-16 xl:ml-20">

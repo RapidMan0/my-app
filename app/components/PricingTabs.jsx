@@ -1,0 +1,139 @@
+"use client";
+
+import React, { useState } from "react";
+
+const PricingTabs = () => {
+    const [activeTab, setActiveTab] = useState("basic");
+
+    const pricingData = {
+        basic: [
+            {
+                service: "Men's Haircut",
+                price: "$20",
+                description:
+                    "A classic haircut tailored to your style and preferences.",
+            },
+            {
+                service: "Beard Trim",
+                price: "$10",
+                description: "Precision trimming and shaping for a sharp, clean look.",
+            },
+            {
+                service: "Shampoo",
+                price: "$5",
+                description: "Relaxing shampoo to cleanse and refresh your hair.",
+            },
+        ],
+        premium: [
+            {
+                service: "Men's Haircut + Styling",
+                price: "$40",
+                description:
+                    "A premium haircut with expert styling for a polished look.",
+            },
+            {
+                service: "Beard Trim + Grooming",
+                price: "$25",
+                description: "Comprehensive grooming for a well-maintained beard.",
+            },
+            {
+                service: "Shampoo + Conditioning",
+                price: "$15",
+                description: "Deep conditioning treatment for healthy, shiny hair.",
+            },
+        ],
+        deluxe: [
+            {
+                service: "Full Haircut Package",
+                price: "$60",
+                description:
+                    "Complete haircut package with styling and finishing touches.",
+            },
+            {
+                service: "Beard Trim + Facial",
+                price: "$40",
+                description: "A relaxing facial combined with expert beard grooming.",
+            },
+            {
+                service: "Scalp Treatment",
+                price: "$30",
+                description: "Therapeutic scalp treatment to promote hair health.",
+            },
+        ],
+    };
+
+    return (
+        <section
+            className="relative z-10 overflow-hidden bg-cover bg-center pb-12 pt-20 lg:pb-[90px] lg:pt-[120px]"
+            style={{
+                backgroundImage: "url('/360.jpg')",
+                backgroundAttachment: "fixed",
+                textShadow: '2px 2px 4px rgba(0, 0, 0, 0.7)',
+            }}
+        >
+            {/* Затемнение фона */}
+            <div className="absolute inset-0 bg-black opacity-80 z-0"></div>
+
+            <div className="relative container mx-auto p-6 rounded-lg z-10">
+                <div className="-mx-4 flex flex-wrap">
+                    <div className="w-full px-4">
+                        <div className="mx-auto mb-[60px] max-w-[510px] text-center">
+                            <h2 className="mb-3 text-3xl font-bold leading-[1.208] text-red-500 sm:text-4xl md:text-[40px]">
+                                Our Pricing Plan
+                            </h2>
+                            <p className="text-base text-gray-300">
+                                Choose the best plan that fits your needs. Switch between tabs
+                                to explore our pricing options.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex justify-center mb-6">
+                    {["basic", "premium", "deluxe"].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-6 py-2 mx-2 rounded border-gray-600 border-2 ${activeTab === tab
+                                    ? "bg-[#ff0000] text-white"
+                                    : "bg-[#2a2a2a] text-gray-300"
+                                } hover:bg-[#ff0000] hover:text-white transition`}
+                        >
+                            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="-mx-4 flex flex-wrap justify-center">
+                    {pricingData[activeTab].map((item, index) => (
+                        <div key={index} className="w-full px-4 md:w-1/2 lg:w-1/3 flex">
+                            <div className="relative z-10 mb-10 flex-grow overflow-hidden rounded-[10px] border-2 border-gray-600 bg-[#2a2a2a] px-8 py-10 shadow-lg sm:p-12 lg:px-6 lg:py-10 xl:p-[50px] min-h-[350px] flex flex-col justify-between">
+                                <div>
+                                    <h3 className="mb-3 text-[24px] font-bold text-white">
+                                        {item.service}
+                                    </h3>
+                                    <p className="mb-5 text-base text-gray-300">
+                                        {item.description}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="mb-8 text-[32px] font-bold text-[#ff0000]">
+                                        {item.price}
+                                    </p>
+                                    <a
+                                        href="#"
+                                        className="block w-full rounded-md border border-[#ff0000] bg-[#ff0000] p-3 text-center text-base font-medium text-white transition hover:bg-opacity-90"
+                                    >
+                                        Choose Plan
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+export default PricingTabs;
