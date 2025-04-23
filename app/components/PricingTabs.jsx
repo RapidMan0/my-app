@@ -9,54 +9,54 @@ const PricingTabs = () => {
         basic: [
             {
                 service: "Men's Haircut",
-                price: "$20",
+                price: "100 mdl",
                 description:
                     "A classic haircut tailored to your style and preferences.",
             },
             {
                 service: "Beard Trim",
-                price: "$10",
+                price: "70 mdl",
                 description: "Precision trimming and shaping for a sharp, clean look.",
             },
             {
                 service: "Shampoo",
-                price: "$5",
+                price: "50 mdl",
                 description: "Relaxing shampoo to cleanse and refresh your hair.",
             },
         ],
         premium: [
             {
                 service: "Men's Haircut + Styling",
-                price: "$40",
+                price: "200 mdl",
                 description:
                     "A premium haircut with expert styling for a polished look.",
             },
             {
                 service: "Beard Trim + Grooming",
-                price: "$25",
+                price: "150 mdl",
                 description: "Comprehensive grooming for a well-maintained beard.",
             },
             {
                 service: "Shampoo + Conditioning",
-                price: "$15",
+                price: "100 mdl",
                 description: "Deep conditioning treatment for healthy, shiny hair.",
             },
         ],
         deluxe: [
             {
                 service: "Full Haircut Package",
-                price: "$60",
+                price: "300 mdl",
                 description:
                     "Complete haircut package with styling and finishing touches.",
             },
             {
                 service: "Beard Trim + Facial",
-                price: "$40",
+                price: "250 mdl",
                 description: "A relaxing facial combined with expert beard grooming.",
             },
             {
                 service: "Scalp Treatment",
-                price: "$30",
+                price: "150 mdl",
                 description: "Therapeutic scalp treatment to promote hair health.",
             },
         ],
@@ -64,6 +64,7 @@ const PricingTabs = () => {
 
     return (
         <section
+            id="pricing-tabs"
             className="relative z-10 overflow-hidden bg-cover bg-center pb-12 pt-20 lg:pb-[90px] lg:pt-[120px]"
             style={{
                 backgroundImage: "url('/360.jpg')",
@@ -79,7 +80,7 @@ const PricingTabs = () => {
                     <div className="w-full px-4">
                         <div className="mx-auto mb-[60px] max-w-[510px] text-center">
                             <h2 className="mb-3 text-3xl font-bold leading-[1.208] text-red-500 sm:text-4xl md:text-[40px]">
-                                Our Pricing Plan
+                                Services and our pricing Plans
                             </h2>
                             <p className="text-base text-gray-300">
                                 Choose the best plan that fits your needs. Switch between tabs
@@ -95,9 +96,9 @@ const PricingTabs = () => {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-6 py-2 mx-2 rounded border-gray-600 border-2 ${activeTab === tab
-                                    ? "bg-[#ff0000] text-white"
-                                    : "bg-[#2a2a2a] text-gray-300"
-                                } hover:bg-[#ff0000] hover:text-white transition`}
+                                ? "bg-red-500 text-white"
+                                : "bg-[#2a2a2a] text-gray-300"
+                                } hover:bg-gray-600 hover:text-white transition`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
@@ -116,15 +117,15 @@ const PricingTabs = () => {
                                         {item.description}
                                     </p>
                                 </div>
-                                <div>
-                                    <p className="mb-8 text-[32px] font-bold text-[#ff0000]">
+                                <div className="flex flex-col items-center">
+                                    <p className="mb-8 text-[32px] font-bold text-red-500">
                                         {item.price}
                                     </p>
                                     <a
                                         href="#"
-                                        className="block w-full rounded-md border border-[#ff0000] bg-[#ff0000] p-3 text-center text-base font-medium text-white transition hover:bg-opacity-90"
+                                        className="block w-full rounded-md border border-[#ff0000] bg-red-500 p-3 text-center text-base font-medium text-white transition hover:bg-opacity-90"
                                     >
-                                        Choose Plan
+                                        Choose Service
                                     </a>
                                 </div>
                             </div>

@@ -5,6 +5,7 @@ import About from "./components/About";
 import Services from "./components/Services";
 import "./globals.css";
 import PricingTabs from "./components/PricingTabs";
+import BookingSystem from "./components/BookingSystem";
 
 export default function Page() {
   return (
@@ -15,6 +16,7 @@ export default function Page() {
       <About />
       <Services />
       <PricingTabs />
+      <BookingSystem />
     </>
   );
 }

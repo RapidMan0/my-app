@@ -17,7 +17,7 @@ const About = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prevIndex) => (prevIndex + 1) % galleryImages.length);
-        }, 2000); // смена каждые 5 секунд
+        }, 5000); // смена каждые 5 секунд
 
         return () => clearInterval(interval); // очистка при размонтировании
     }, [galleryImages.length]);
