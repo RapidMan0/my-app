@@ -1,5 +1,5 @@
 const Home = () => (
-    <section 
+    <section
         id="home"
         className="bg-cover bg-center h-screen flex items-center justify-start text-white text-left"
         style={{

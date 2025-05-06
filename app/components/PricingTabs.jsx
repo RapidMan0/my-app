@@ -98,7 +98,7 @@ const PricingTabs = () => {
                             className={`px-6 py-2 mx-2 rounded border-gray-600 border-2 ${activeTab === tab
                                 ? "bg-red-500 text-white"
                                 : "bg-[#2a2a2a] text-gray-300"
-                                } hover:bg-gray-600 hover:text-white transition`}
+                                } hover:bg-indigo-500 hover:text-white transition`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
                         </button>
