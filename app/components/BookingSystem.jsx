@@ -3,16 +3,25 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useForm } from "react-hook-form";
+import emailjs from "emailjs-com";
 
 const BookingSidebar = () => {
   const [barbers, setBarbers] = useState([]);
   const [services, setServices] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [showBookingButton, setShowBookingButton] = useState(true); // Управление видимостью кнопки
+  const [showBookingButton, setShowBookingButton] = useState(true);
   const [selectedBarber, setSelectedBarber] = useState(null);
   const [selectedService, setSelectedService] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
+  const [showForm, setShowForm] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
   useEffect(() => {
     const fetchBarbers = async () => {
@@ -21,7 +30,8 @@ const BookingSidebar = () => {
           "https://api.jsonbin.io/v3/b/680b66408a456b7966910e72/latest",
           {
             headers: {
-              "X-Master-Key": "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
+              "X-Master-Key":
+                "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
             },
           }
         );
@@ -38,7 +48,8 @@ const BookingSidebar = () => {
           "https://api.jsonbin.io/v3/b/680b69788960c979a58cd355/latest",
           {
             headers: {
-              "X-Master-Key": "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
+              "X-Master-Key":
+                "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
             },
           }
         );
@@ -53,7 +64,6 @@ const BookingSidebar = () => {
     fetchServices();
   }, []);
 
-  // Блокировка прокрутки основной страницы
   useEffect(() => {
     const handleScroll = (e) => {
       if (isOpen) {
@@ -76,23 +86,45 @@ const BookingSidebar = () => {
     };
   }, [isOpen]);
 
-  const handleBooking = () => {
-    if (!selectedBarber || !selectedService || !selectedTime || !selectedDate) {
-      alert("Please select a barber, service, date, and time to book an appointment.");
-      return;
-    }
-    alert(
-      `Appointment booked with ${selectedBarber.name} for ${selectedService.name} on ${selectedDate} at ${selectedTime}.`
-    );
+  const onSubmit = (data) => {
+    const templateParams = {
+      barber: selectedBarber.name,
+      service: selectedService.name,
+      date: selectedDate,
+      time: selectedTime,
+      email: data.email,
+      phone: data.phone,
+      price: selectedService.price,
+    };
+
+    emailjs
+      .send(
+        "service_m48lm91",     // <-- замените
+        "template_pmcf25u",    // <-- замените
+        templateParams,
+        "TWMGobjrMR-dkenWF"      // <-- замените
+      )
+      .then(
+        (result) => {
+          alert("Appointment booked and email sent!");
+          setShowForm(false);
+          setIsOpen(false);
+          setShowBookingButton(true);
+        },
+        (error) => {
+          console.error("Email error:", error);
+          alert("Failed to send email. Try again later.");
+        }
+      );
   };
 
   return (
     <>
-      {showBookingButton && ( // Кнопка отображается только если showBookingButton === true
+      {showBookingButton && (
         <button
           onClick={() => {
             setIsOpen(true);
-            setShowBookingButton(false); // Скрыть кнопку после нажатия
+            setShowBookingButton(false);
           }}
           className="fixed bottom-6 right-6 z-50 bg-black text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-all"
         >
@@ -108,23 +140,33 @@ const BookingSidebar = () => {
         className="fixed top-0 right-0 h-full w-full sm:w-[28rem] bg-white shadow-2xl z-40 overflow-y-auto p-6"
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Choose a Barber</h2>
+          <h2 className="text-2xl font-bold">
+            {selectedBarber ? "Choose a Service" : "Choose a Barber"}
+          </h2>
           <button
             onClick={() => {
-              setIsOpen(false);
-              setShowBookingButton(true); // Показать кнопку снова при закрытии боковой панели
+              if (selectedBarber) {
+                setSelectedBarber(null); // Сбросить выбранного барбера
+                setSelectedService(null);
+                setSelectedDate("");
+                setSelectedTime(null);
+              } else {
+                setIsOpen(false);
+                setShowBookingButton(true);
+                setShowForm(false);
+              }
             }}
             className="text-2xl"
           >
-            ×
+            {selectedBarber ? "← Back" : "×"}
           </button>
         </div>
-
-        {/* Выбор барбера */}
         {barbers.map((barber) => (
           <div
             key={barber.id}
-            className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${selectedBarber?.id === barber.id ? "border-blue-500" : "border-gray-200"
+            className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${selectedBarber?.id === barber.id
+              ? "border-red-500"
+              : "border-gray-200"
               }`}
             onClick={() => {
               setSelectedBarber(barber);
@@ -139,19 +181,20 @@ const BookingSidebar = () => {
                 alt={barber.name}
                 width={48}
                 height={48}
-                className="rounded-full"
+                className="w-12 h-12 rounded-full object-cover"
               />
               <div>
                 <p className="font-semibold text-lg">{barber.name}</p>
                 <p className="text-sm text-gray-500">{barber.role}</p>
                 <p className="text-yellow-500 text-sm">
                   ★★★★★{" "}
-                  <span className="text-gray-500">{barber.feedback} feedbacks</span>
+                  <span className="text-gray-500">
+                    {barber.feedback} feedbacks
+                  </span>
                 </p>
               </div>
             </div>
 
-            {/* Меню выбора услуги */}
             {selectedBarber?.id === barber.id && (
               <>
                 <div className="mt-4">
@@ -159,7 +202,9 @@ const BookingSidebar = () => {
                   {services.map((service) => (
                     <div
                       key={service.id}
-                      className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${selectedService?.id === service.id ? "border-blue-500" : "border-gray-200"
+                      className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${selectedService?.id === service.id
+                        ? "border-red-500"
+                        : "border-gray-200"
                         }`}
                       onClick={(e) => {
                         e.stopPropagation();
@@ -167,16 +212,21 @@ const BookingSidebar = () => {
                       }}
                     >
                       <p className="font-semibold">{service.name}</p>
-                      <p className="text-sm text-gray-500">{service.description}</p>
-                      <p className="text-sm font-bold text-blue-500">{service.price}</p>
+                      <p className="text-sm text-gray-500">
+                        {service.description}
+                      </p>
+                      <p className="text-sm font-bold text-blue-500">
+                        {service.price}
+                      </p>
                     </div>
                   ))}
                 </div>
 
-                {/* Меню выбора даты */}
                 {selectedService && (
                   <div className="mt-4">
-                    <label className="block text-lg font-semibold mb-2">Choose a Date:</label>
+                    <label className="block text-lg font-semibold mb-2">
+                      Choose a Date:
+                    </label>
                     <input
                       type="date"
                       className="w-full p-3 border rounded"
@@ -187,15 +237,18 @@ const BookingSidebar = () => {
                   </div>
                 )}
 
-                {/* Меню выбора времени */}
                 {selectedService && selectedDate && (
                   <div className="mt-4">
-                    <label className="block text-lg font-semibold mb-2">Choose a Time:</label>
+                    <label className="block text-lg font-semibold mb-2">
+                      Choose a Time:
+                    </label>
                     <div className="flex gap-2 flex-wrap">
                       {barber.availableTimes.map((time, index) => (
                         <button
                           key={index}
-                          className={`px-3 py-1 rounded-full text-sm shadow ${selectedTime === time ? "bg-blue-500 text-white" : "bg-gray-100"
+                          className={`px-3 py-1 rounded-full text-sm shadow ${selectedTime === time
+                            ? "bg-red-500 text-white"
+                            : "bg-gray-100"
                             }`}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -213,14 +266,68 @@ const BookingSidebar = () => {
           </div>
         ))}
 
-        {/* Кнопка подтверждения */}
-        {selectedBarber && selectedService && selectedDate && selectedTime && (
-          <button
-            onClick={handleBooking}
-            className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg text-lg hover:bg-blue-700 transition"
+        {/* Confirm button or form */}
+        {selectedBarber &&
+          selectedService &&
+          selectedDate &&
+          selectedTime &&
+          !showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg text-lg hover:bg-blue-700 transition"
+            >
+              Confirm Appointment
+            </button>
+          )}
+
+        {showForm && (
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="mt-6 space-y-4 border-t pt-4"
           >
-            Confirm Appointment
-          </button>
+            <div>
+              <label className="block text-sm font-medium">Email</label>
+              <input
+                type="email"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                    message: "Invalid email format",
+                  },
+                })}
+                className="w-full p-3 border rounded"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium">Phone Number</label>
+              <input
+                type="tel"
+                {...register("phone", {
+                  required: "Phone number is required",
+                  pattern: {
+                    value: /^[0-9]{8,15}$/,
+                    message: "Enter a valid phone number (10-15 digits)",
+                  },
+                })}
+                className="w-full p-3 border rounded"
+              />
+              {errors.phone && (
+                <p className="text-red-500 text-sm">{errors.phone.message}</p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg hover:bg-blue-700 transition"
+            >
+              Submit Booking
+            </button>
+          </form>
         )}
       </motion.aside>
     </>
