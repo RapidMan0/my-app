@@ -227,12 +227,17 @@ const BookingSidebar = () => {
                     <label className="block text-lg font-semibold mb-2">
                       Choose a Date:
                     </label>
+                    {/* filepath: c:\Users\RapidMan\Desktop\my-app\app\components\BookingSystem.jsx */}
                     <input
                       type="date"
                       className="w-full p-3 border rounded"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
+                      min={new Date().toISOString().split("T")[0]} // Blochează zilele din trecut
+                      max={new Date(new Date().setDate(new Date().getDate() + 30))
+                        .toISOString()
+                        .split("T")[0]} // Permite doar următoarele 30 de zile
                     />
                   </div>
                 )}

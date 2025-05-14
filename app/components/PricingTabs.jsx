@@ -121,12 +121,12 @@ const PricingTabs = () => {
                                     <p className="mb-8 text-[32px] font-bold text-red-500">
                                         {item.price}
                                     </p>
-                                    <a
-                                        href="#"
-                                        className="block w-full rounded-md border border-[#ff0000] bg-red-500 p-3 text-center text-base font-medium text-white transition hover:bg-opacity-90"
-                                    >
-                                        Choose Service
-                                    </a>
+                                    <img
+                                        src={`/${activeTab}-${index + 1}.jpg`}
+                                        alt={`${item.service} image`}
+                                        className="w-full h-64 object-cover rounded-md mt-4"
+                                    />
+
                                 </div>
                             </div>
                         </div>

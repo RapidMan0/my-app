@@ -6,7 +6,7 @@ const About = () => {
     const galleryImages = [
         './salon1.png',
         './salon5.jpg',
-        './image.jpg',
+        './salon6.jpg',
         'salon3.jpg',
         'salon4.jpg',
     ];
