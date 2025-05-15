@@ -23,6 +23,7 @@ const BookingSidebar = () => {
     formState: { errors },
   } = useForm();
 
+  // Fetch barbers and services data
   useEffect(() => {
     const fetchBarbers = async () => {
       try {

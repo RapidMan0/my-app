@@ -48,7 +48,7 @@ const GalleryWithFilters = () => {
 
     return (
         <section className="pt-12" style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}>
-             <h2 className="text-3xl text-shadow font-bold text-center mb-10 text-red-500">OUR GALLERY</h2>
+            <h2 className="text-3xl text-shadow font-bold text-center mb-10 text-red-500">OUR GALLERY</h2>
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
                 {/* Фильтры */}
                 <div className="w-full md:w-1/6">
@@ -59,8 +59,8 @@ const GalleryWithFilters = () => {
                                 key={tag}
                                 onClick={() => handleFilter(tag)}
                                 className={`py-2 rounded border w-40 ${selectedTags.includes(tag)
-                                        ? "bg-red-500 text-white"
-                                        : "bg-[#2a2a2a] border-gray-600 text-white"
+                                    ? "bg-red-500 text-white"
+                                    : "bg-[#2a2a2a] border-gray-600 text-white"
                                     } hover:bg-red-500 hover:text-white transition`}
                             >
                                 {tag}
@@ -92,9 +92,7 @@ const GalleryWithFilters = () => {
                                     className="w-full h-full object-cover"
                                     src={image.src}
                                     alt={image.alt}
-                                    loading="lazy"
                                 />
-                                {/* Теги */}
                                 {/* Теги */}
                                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out flex flex-wrap justify-center gap-2 p-2">
                                     {image.tags.map((tag, index) => (
