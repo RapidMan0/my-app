@@ -66,6 +66,8 @@ const BookingSidebar = () => {
     fetchServices();
   }, []);
 
+  // Handle scroll event to prevent background scrolling
+
   useEffect(() => {
     const handleScroll = (e) => {
       if (isOpen) {
