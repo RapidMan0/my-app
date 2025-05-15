@@ -43,6 +43,7 @@ const BookingSidebar = () => {
       }
     };
 
+    // Fetch services data
     const fetchServices = async () => {
       try {
         const response = await fetch(
