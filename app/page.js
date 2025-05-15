@@ -7,6 +7,7 @@ import "./globals.css";
 import PricingTabs from "./components/PricingTabs";
 import BookingSystem from "./components/BookingSystem";
 import GalleryWithFilters from "./components/GalleryWithFilters";
+import Footer from "./components/Footer";
 
 export default function Page() {
   return (
@@ -19,6 +20,7 @@ export default function Page() {
       <Services />
       <PricingTabs />
       <BookingSystem />
+      <Footer />
     </>
   );
 }

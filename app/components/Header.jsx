@@ -4,7 +4,7 @@ import React, { useState } from "react";
 
 const Header = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const navItems = ["Home", "About", "Services", "Our Gallery", "Contact"];
+    const navItems = ["Home", "About", "Services", "Gallery", "Contact"];
 
     return (
         <header className="bg-black text-white shadow-md">

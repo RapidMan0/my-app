@@ -47,7 +47,7 @@ const GalleryWithFilters = () => {
     };
 
     return (
-        <section className="pt-12" style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}>
+        <section id="gallery" className="pt-12" style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}>
             <h2 className="text-3xl text-shadow font-bold text-center mb-10 text-red-500">OUR GALLERY</h2>
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
                 {/* Фильтры */}

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 const PricingTabs = () => {
     const [activeTab, setActiveTab] = useState("basic");
+    const [tabSwitchKey, setTabSwitchKey] = useState(0);
 
     const pricingData = {
         basic: [
@@ -62,6 +63,12 @@ const PricingTabs = () => {
         ],
     };
 
+    // Добавляем key для анимации при смене тарифа
+    const handleTabChange = (tab) => {
+        setActiveTab(tab);
+        setTabSwitchKey((prev) => prev + 1);
+    };
+
     return (
         <section
             id="pricing-tabs"
@@ -94,7 +101,7 @@ const PricingTabs = () => {
                     {["basic", "premium", "deluxe"].map((tab) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab)}
+                            onClick={() => handleTabChange(tab)}
                             className={`px-6 py-2 mx-2 rounded border-gray-600 border-2 ${activeTab === tab
                                 ? "bg-red-500 text-white"
                                 : "bg-[#2a2a2a] text-gray-300"
@@ -105,7 +112,12 @@ const PricingTabs = () => {
                     ))}
                 </div>
 
-                <div className="-mx-4 flex flex-wrap justify-center">
+                {/* Анимация fade для карточек при смене тарифа */}
+                <div
+                    key={tabSwitchKey}
+                    className="-mx-4 flex flex-wrap justify-center transition-opacity duration-500 animate-fade-in"
+                    style={{ animation: "fadeIn 0.5s" }}
+                >
                     {pricingData[activeTab].map((item, index) => (
                         <div key={index} className="w-full px-4 md:w-1/2 lg:w-1/3 flex">
                             <div className="relative z-10 mb-10 flex-grow overflow-hidden rounded-[10px] border-2 border-gray-600 bg-[#2a2a2a] px-8 py-10 shadow-lg sm:p-12 lg:px-6 lg:py-10 xl:p-[50px] min-h-[350px] flex flex-col justify-between">
@@ -124,9 +136,8 @@ const PricingTabs = () => {
                                     <img
                                         src={`/${activeTab}-${index + 1}.jpg`}
                                         alt={`${item.service} image`}
-                                        className="w-full h-64 object-cover rounded-md mt-4"
+                                        className="w-full h-64 shadow-lg object-cover rounded-md mt-4"
                                     />
-
                                 </div>
                             </div>
                         </div>
