@@ -196,6 +196,9 @@ const BookingSidebar = () => {
                     {barber.feedback} feedbacks
                   </span>
                 </p>
+                {barber.experience && (
+                  <p className="text-xs text-gray-400">Experience: {barber.experience}</p>
+                )}
               </div>
             </div>
 
@@ -241,7 +244,7 @@ const BookingSidebar = () => {
                       min={new Date().toISOString().split("T")[0]} // Blochează zilele din trecut
                       max={new Date(new Date().setDate(new Date().getDate() + 30))
                         .toISOString()
-                        .split("T")[0]} // Permite doar următoarele 30 de zile
+                        .split("T")[0]} // Permite doar următoarele 30 de zile, T este separatorul
                     />
                   </div>
                 )}
@@ -283,7 +286,7 @@ const BookingSidebar = () => {
           !showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="mt-6 w-full bg-blue-600 text-white py-3 rounded-lg text-lg hover:bg-blue-700 transition"
+              className="mt-6 w-full bg-red-600 text-white py-3 rounded-lg text-lg hover:bg-red-800 transition"
             >
               Confirm Appointment
             </button>
