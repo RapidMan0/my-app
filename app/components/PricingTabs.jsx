@@ -135,8 +135,8 @@ const PricingTabs = () => {
                                     </p>
                                     <img
                                         src={`/${activeTab}-${index + 1}.jpg`}
-                                        alt={`${item.service} image`}
                                         className="w-full h-64 shadow-lg object-cover rounded-md mt-4"
+                                        alt=""
                                     />
                                 </div>
                             </div>
