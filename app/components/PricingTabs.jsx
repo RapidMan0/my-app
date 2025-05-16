@@ -83,6 +83,22 @@ const PricingTabs = () => {
             <div className="absolute inset-0 bg-black opacity-80 z-0"></div>
 
             <div className="relative container mx-auto p-6 rounded-lg z-10">
+
+                {/* Прелоад картинок всех табов */}
+                <div style={{ display: "none" }}>
+                    {Object.entries(pricingData).map(([tab, items]) =>
+                        items.map((_, idx) => (
+                            <img
+                                key={`${tab}-${idx}`}
+                                src={`/${tab}-${idx + 1}.jpg`}
+                                alt=""
+                                loading="eager"
+                                decoding="async"
+                            />
+                        ))
+                    )}
+                </div>
+
                 <div className="-mx-4 flex flex-wrap">
                     <div className="w-full px-4">
                         <div className="mx-auto mb-[60px] max-w-[510px] text-center">
