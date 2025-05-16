@@ -92,6 +92,8 @@ const GalleryWithFilters = () => {
                                     className="w-full h-full object-cover"
                                     src={image.src}
                                     alt=""
+                                    loading="lazy"
+                                    decoding="async"
                                 />
                                 {/* Теги */}
                                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-in-out flex flex-wrap justify-center gap-2 p-2">
