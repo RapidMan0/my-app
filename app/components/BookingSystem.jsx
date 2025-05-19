@@ -68,27 +68,16 @@ const BookingSidebar = () => {
 
   // Handle scroll event to prevent background scrolling
 
-  useEffect(() => {
-    const handleScroll = (e) => {
-      if (isOpen) {
-        const sidebar = document.getElementById("booking-sidebar");
-        if (sidebar && !sidebar.contains(e.target)) {
-          document.body.classList.remove("overflow-hidden");
-        } else {
-          document.body.classList.add("overflow-hidden");
-        }
-      }
-    };
-
-    document.addEventListener("wheel", handleScroll, { passive: true });
-    document.addEventListener("touchmove", handleScroll, { passive: true });
-
-    return () => {
-      document.removeEventListener("wheel", handleScroll);
-      document.removeEventListener("touchmove", handleScroll);
-      document.body.classList.remove("overflow-hidden");
-    };
-  }, [isOpen]);
+useEffect(() => {
+  if (isOpen) {
+    document.body.classList.add("overflow-hidden");
+  } else {
+    document.body.classList.remove("overflow-hidden");
+  }
+  return () => {
+    document.body.classList.remove("overflow-hidden");
+  };
+}, [isOpen]);
 
   const onSubmit = (data) => {
     const templateParams = {
