@@ -6,6 +6,29 @@ import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import emailjs from "emailjs-com";
 
+// Toast уведомление
+const Toast = ({ message, show, onClose, type = "success" }) => (
+  <div
+    className={`fixed bottom-8 right-8 z-[9999] px-6 py-4 rounded-lg shadow-lg transition-all duration-500
+      ${show ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"}
+      ${type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"}
+    `}
+    role="alert"
+  >
+    <div className="flex items-center gap-3">
+      <span className="text-2xl">{type === "success" ? "✅" : "❌"}</span>
+      <span className="font-semibold">{message}</span>
+      <button
+        className="ml-4 text-white text-xl hover:text-gray-200"
+        onClick={onClose}
+        aria-label="Close"
+      >
+        ×
+      </button>
+    </div>
+  </div>
+);
+
 const BookingSidebar = () => {
   const [barbers, setBarbers] = useState([]);
   const [services, setServices] = useState([]);
@@ -16,6 +39,7 @@ const BookingSidebar = () => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
 
   const {
     register,
@@ -67,17 +91,21 @@ const BookingSidebar = () => {
   }, []);
 
   // Handle scroll event to prevent background scrolling
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, [isOpen]);
 
-useEffect(() => {
-  if (isOpen) {
-    document.body.classList.add("overflow-hidden");
-  } else {
-    document.body.classList.remove("overflow-hidden");
-  }
-  return () => {
-    document.body.classList.remove("overflow-hidden");
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast((t) => ({ ...t, show: false })), 3500);
   };
-}, [isOpen]);
 
   const onSubmit = (data) => {
     const templateParams = {
@@ -99,14 +127,14 @@ useEffect(() => {
       )
       .then(
         (result) => {
-          alert("Appointment booked and email sent!");
+          showToast("Appointment booked and email sent!", "success");
           setShowForm(false);
           setIsOpen(false);
           setShowBookingButton(true);
         },
         (error) => {
           console.error("Email error:", error);
-          alert("Failed to send email. Try again later.");
+          showToast("Failed to send email. Try again later.", "error");
         }
       );
   };
@@ -223,17 +251,16 @@ useEffect(() => {
                     <label className="block text-lg font-semibold mb-2">
                       Choose a Date:
                     </label>
-                    {/* filepath: c:\Users\RapidMan\Desktop\my-app\app\components\BookingSystem.jsx */}
                     <input
                       type="date"
                       className="w-full p-3 border rounded"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
-                      min={new Date().toISOString().split("T")[0]} // Blochează zilele din trecut
+                      min={new Date().toISOString().split("T")[0]}
                       max={new Date(new Date().setDate(new Date().getDate() + 30))
                         .toISOString()
-                        .split("T")[0]} // Permite doar următoarele 30 de zile, T este separatorul
+                        .split("T")[0]}
                     />
                   </div>
                 )}
@@ -331,6 +358,12 @@ useEffect(() => {
           </form>
         )}
       </motion.aside>
+      <Toast
+        message={toast.message}
+        show={toast.show}
+        onClose={() => setToast((t) => ({ ...t, show: false }))}
+        type={toast.type}
+      />
     </>
   );
 };
