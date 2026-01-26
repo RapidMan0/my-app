@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import emailjs from "emailjs-com";
+import { useAuth } from "./Auth/AuthProvider";
 
 // Toast уведомление
 const Toast = ({ message, show, onClose, type = "success" }) => (
@@ -30,6 +31,7 @@ const Toast = ({ message, show, onClose, type = "success" }) => (
 );
 
 const BookingSidebar = () => {
+  const { user, accessToken, updateUser } = useAuth();
   const [barbers, setBarbers] = useState([]);
   const [services, setServices] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +41,13 @@ const BookingSidebar = () => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [showForm, setShowForm] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
+  const [discount, setDiscount] = useState(0);
+  const [finalPrice, setFinalPrice] = useState(0);
 
   const {
     register,
@@ -58,7 +66,7 @@ const BookingSidebar = () => {
               "X-Master-Key":
                 "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
             },
-          }
+          },
         );
         const json = await response.json();
         setBarbers(json.record.barbers);
@@ -77,7 +85,7 @@ const BookingSidebar = () => {
               "X-Master-Key":
                 "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
             },
-          }
+          },
         );
         const json = await response.json();
         setServices(json.record.services);
@@ -107,7 +115,79 @@ const BookingSidebar = () => {
     setTimeout(() => setToast((t) => ({ ...t, show: false })), 3500);
   };
 
-  const onSubmit = (data) => {
+  // Calculate discount based on haircut count
+  useEffect(() => {
+    if (!selectedService || !user) {
+      setDiscount(0);
+      setFinalPrice(selectedService?.price || 0);
+      return;
+    }
+
+    let discountPercent = 0;
+    let discountMessage = "";
+
+    if (user.haircutCount >= 3 && user.haircutCount < 6) {
+      discountPercent = 10;
+      discountMessage = "🎉 10% discount for 3+ haircuts!";
+    } else if (user.haircutCount >= 6 && user.haircutCount < 10) {
+      discountPercent = 15;
+      discountMessage = "🎊 15% discount for 6+ haircuts!";
+    } else if (user.haircutCount >= 10) {
+      discountPercent = 20;
+      discountMessage = "🏆 20% discount for 10+ haircuts!";
+    }
+
+    const priceNum = parseFloat(selectedService.price.replace(/[^\d.]/g, ""));
+    const discountAmount = (priceNum * discountPercent) / 100;
+    const final = priceNum - discountAmount;
+
+    setDiscount({
+      percent: discountPercent,
+      amount: discountAmount,
+      message: discountMessage,
+    });
+    setFinalPrice(Math.round(final)); // Округляем до целого числа
+  }, [selectedService, user]);
+
+  const onSubmit = async (data) => {
+    // If user is logged in, make API call to record booking
+    if (user && accessToken) {
+      try {
+        const response = await fetch("/api/bookings/create", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            barber: selectedBarber.name,
+            service: selectedService.name,
+            date: selectedDate,
+            time: selectedTime,
+            email: data.email,
+            phone: data.phone,
+          }),
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          showToast(error.error || "Failed to create booking", "error");
+          return;
+        }
+
+        const result = await response.json();
+        // Update user in context with new haircut count
+        if (result.user) {
+          updateUser(result.user);
+        }
+      } catch (err) {
+        console.error("Booking error:", err);
+        showToast("Failed to create booking. Try again.", "error");
+        return;
+      }
+    }
+
+    // Send email
     const templateParams = {
       barber: selectedBarber.name,
       service: selectedService.name,
@@ -115,27 +195,34 @@ const BookingSidebar = () => {
       time: selectedTime,
       email: data.email,
       phone: data.phone,
-      price: selectedService.price,
+      price: `${finalPrice} mdl`,
+      originalPrice: selectedService.price,
+      discount: discount.percent,
     };
 
     emailjs
       .send(
-        "service_m48lm91",     // <-- замените
-        "template_pmcf25u",    // <-- замените
+        "service_m48lm91", // <-- замените
+        "template_pmcf25u", // <-- замените
         templateParams,
-        "TWMGobjrMR-dkenWF"      // <-- замените
+        "TWMGobjrMR-dkenWF", // <-- замените
       )
       .then(
         (result) => {
-          showToast("Appointment booked and email sent!", "success");
+          showToast(`Booking confirmed! ${discount.message}`, "success");
           setShowForm(false);
           setIsOpen(false);
           setShowBookingButton(true);
+          // Reset form
+          setSelectedBarber(null);
+          setSelectedService(null);
+          setSelectedDate("");
+          setSelectedTime(null);
         },
         (error) => {
           console.error("Email error:", error);
           showToast("Failed to send email. Try again later.", "error");
-        }
+        },
       );
   };
 
@@ -185,10 +272,11 @@ const BookingSidebar = () => {
         {barbers.map((barber) => (
           <div
             key={barber.id}
-            className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${selectedBarber?.id === barber.id
-              ? "border-red-500"
-              : "border-gray-200"
-              }`}
+            className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${
+              selectedBarber?.id === barber.id
+                ? "border-red-500"
+                : "border-gray-200"
+            }`}
             onClick={() => {
               setSelectedBarber(barber);
               setSelectedService(null);
@@ -214,7 +302,9 @@ const BookingSidebar = () => {
                   </span>
                 </p>
                 {barber.experience && (
-                  <p className="text-xs text-gray-400">Experience: {barber.experience}</p>
+                  <p className="text-xs text-gray-400">
+                    Experience: {barber.experience}
+                  </p>
                 )}
               </div>
             </div>
@@ -222,14 +312,17 @@ const BookingSidebar = () => {
             {selectedBarber?.id === barber.id && (
               <>
                 <div className="mt-4">
-                  <h3 className="text-xl font-semibold mb-2">Choose a Service:</h3>
+                  <h3 className="text-xl font-semibold mb-2">
+                    Choose a Service:
+                  </h3>
                   {services.map((service) => (
                     <div
                       key={service.id}
-                      className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${selectedService?.id === service.id
-                        ? "border-red-500"
-                        : "border-gray-200"
-                        }`}
+                      className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${
+                        selectedService?.id === service.id
+                          ? "border-red-500"
+                          : "border-gray-200"
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedService(service);
@@ -258,9 +351,11 @@ const BookingSidebar = () => {
                       onChange={(e) => setSelectedDate(e.target.value)}
                       onClick={(e) => e.stopPropagation()}
                       min={new Date().toISOString().split("T")[0]}
-                      max={new Date(new Date().setDate(new Date().getDate() + 30))
-                        .toISOString()
-                        .split("T")[0]}
+                      max={
+                        new Date(new Date().setDate(new Date().getDate() + 30))
+                          .toISOString()
+                          .split("T")[0]
+                      }
                     />
                   </div>
                 )}
@@ -274,10 +369,11 @@ const BookingSidebar = () => {
                       {barber.availableTimes.map((time, index) => (
                         <button
                           key={index}
-                          className={`px-3 py-1 rounded-full text-sm shadow ${selectedTime === time
-                            ? "bg-red-500 text-white"
-                            : "bg-gray-100"
-                            }`}
+                          className={`px-3 py-1 rounded-full text-sm shadow ${
+                            selectedTime === time
+                              ? "bg-red-500 text-white"
+                              : "bg-gray-100"
+                          }`}
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedTime(time);
@@ -313,6 +409,49 @@ const BookingSidebar = () => {
             onSubmit={handleSubmit(onSubmit)}
             className="mt-6 space-y-4 border-t pt-4"
           >
+            {/* Discount info */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">
+                  Total visits:
+                </span>
+                <span className="text-lg font-bold text-blue-600">
+                  {user?.haircutCount || 0}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-700">
+                  Original price:
+                </span>
+                <span className="text-lg text-gray-500 line-through">
+                  {selectedService?.price}
+                </span>
+              </div>
+              {discount.percent > 0 && (
+                <>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-sm font-semibold text-green-600">
+                      Discount ({discount.percent}%):
+                    </span>
+                    <span className="text-lg font-bold text-green-600">
+                      -{Math.round(discount.amount)} mdl
+                    </span>
+                  </div>
+                  <p className="text-sm text-green-700 mt-2 font-semibold">
+                    {discount.message}
+                  </p>
+                </>
+              )}
+              <div className="flex justify-between items-center mt-3 pt-3 border-t border-blue-200">
+                <span className="text-lg font-bold text-gray-900">
+                  Final price:
+                </span>
+                <span className="text-2xl font-bold text-red-600">
+                  {finalPrice} mdl
+                </span>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium">Email</label>
               <input
