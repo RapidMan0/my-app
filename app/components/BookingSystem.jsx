@@ -1,11 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import emailjs from "emailjs-com";
 import { useAuth } from "./Auth/AuthProvider";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setBarbers,
+  setServices,
+  setSelectedBarber,
+  setSelectedService,
+  setSelectedDate,
+  setSelectedTime,
+  setIsOpen,
+  setShowForm,
+  setShowBookingButton,
+  setDiscount,
+  setFinalPrice,
+  setToast,
+  resetBooking,
+} from "../../store/bookingSlice";
 
 // Toast уведомление
 const Toast = ({ message, show, onClose, type = "success" }) => (
@@ -32,22 +48,21 @@ const Toast = ({ message, show, onClose, type = "success" }) => (
 
 const BookingSidebar = () => {
   const { user, accessToken, updateUser } = useAuth();
-  const [barbers, setBarbers] = useState([]);
-  const [services, setServices] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
-  const [showBookingButton, setShowBookingButton] = useState(true);
-  const [selectedBarber, setSelectedBarber] = useState(null);
-  const [selectedService, setSelectedService] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [selectedDate, setSelectedDate] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [toast, setToast] = useState({
-    show: false,
-    message: "",
-    type: "success",
-  });
-  const [discount, setDiscount] = useState(0);
-  const [finalPrice, setFinalPrice] = useState(0);
+  const dispatch = useDispatch();
+  const {
+    barbers,
+    services,
+    selectedBarber,
+    selectedService,
+    selectedDate,
+    selectedTime,
+    isOpen,
+    showForm,
+    showBookingButton,
+    discount,
+    finalPrice,
+    toast,
+  } = useSelector((state) => state.booking);
 
   const {
     register,
@@ -69,7 +84,7 @@ const BookingSidebar = () => {
           },
         );
         const json = await response.json();
-        setBarbers(json.record.barbers);
+        dispatch(setBarbers(json.record.barbers));
       } catch (error) {
         console.error("Error fetching barbers:", error);
       }
@@ -88,7 +103,7 @@ const BookingSidebar = () => {
           },
         );
         const json = await response.json();
-        setServices(json.record.services);
+        dispatch(setServices(json.record.services));
       } catch (error) {
         console.error("Error fetching services:", error);
       }
@@ -96,7 +111,7 @@ const BookingSidebar = () => {
 
     fetchBarbers();
     fetchServices();
-  }, []);
+  }, [dispatch]);
 
   // Handle scroll event to prevent background scrolling
   useEffect(() => {
@@ -111,15 +126,18 @@ const BookingSidebar = () => {
   }, [isOpen]);
 
   const showToast = (message, type = "success") => {
-    setToast({ show: true, message, type });
-    setTimeout(() => setToast((t) => ({ ...t, show: false })), 3500);
+    dispatch(setToast({ show: true, message, type }));
+    setTimeout(
+      () => dispatch(setToast({ show: false, message: "", type: "success" })),
+      3500
+    );
   };
 
   // Calculate discount based on haircut count
   useEffect(() => {
     if (!selectedService || !user) {
-      setDiscount(0);
-      setFinalPrice(selectedService?.price || 0);
+      dispatch(setDiscount({ percent: 0, amount: 0, message: "" }));
+      dispatch(setFinalPrice(0));
       return;
     }
 
@@ -141,13 +159,15 @@ const BookingSidebar = () => {
     const discountAmount = (priceNum * discountPercent) / 100;
     const final = priceNum - discountAmount;
 
-    setDiscount({
-      percent: discountPercent,
-      amount: discountAmount,
-      message: discountMessage,
-    });
-    setFinalPrice(Math.round(final)); // Округляем до целого числа
-  }, [selectedService, user]);
+    dispatch(
+      setDiscount({
+        percent: discountPercent,
+        amount: discountAmount,
+        message: discountMessage,
+      })
+    );
+    dispatch(setFinalPrice(Math.round(final)));
+  }, [selectedService, user, dispatch]);
 
   const onSubmit = async (data) => {
     // If user is logged in, make API call to record booking
@@ -210,14 +230,10 @@ const BookingSidebar = () => {
       .then(
         (result) => {
           showToast(`Booking confirmed! ${discount.message}`, "success");
-          setShowForm(false);
-          setIsOpen(false);
-          setShowBookingButton(true);
-          // Reset form
-          setSelectedBarber(null);
-          setSelectedService(null);
-          setSelectedDate("");
-          setSelectedTime(null);
+          dispatch(setShowForm(false));
+          dispatch(setIsOpen(false));
+          dispatch(setShowBookingButton(true));
+          dispatch(resetBooking());
         },
         (error) => {
           console.error("Email error:", error);
@@ -231,8 +247,8 @@ const BookingSidebar = () => {
       {showBookingButton && (
         <button
           onClick={() => {
-            setIsOpen(true);
-            setShowBookingButton(false);
+            dispatch(setIsOpen(true));
+            dispatch(setShowBookingButton(false));
           }}
           className="fixed bottom-6 right-6 z-50 bg-black text-white p-4 rounded-full shadow-lg hover:bg-gray-800 transition-all"
         >
@@ -254,14 +270,14 @@ const BookingSidebar = () => {
           <button
             onClick={() => {
               if (selectedBarber) {
-                setSelectedBarber(null); // Сбросить выбранного барбера
-                setSelectedService(null);
-                setSelectedDate("");
-                setSelectedTime(null);
+                dispatch(setSelectedBarber(null));
+                dispatch(setSelectedService(null));
+                dispatch(setSelectedDate(""));
+                dispatch(setSelectedTime(null));
               } else {
-                setIsOpen(false);
-                setShowBookingButton(true);
-                setShowForm(false);
+                dispatch(setIsOpen(false));
+                dispatch(setShowBookingButton(true));
+                dispatch(setShowForm(false));
               }
             }}
             className="text-2xl"
@@ -278,10 +294,10 @@ const BookingSidebar = () => {
                 : "border-gray-200"
             }`}
             onClick={() => {
-              setSelectedBarber(barber);
-              setSelectedService(null);
-              setSelectedDate("");
-              setSelectedTime(null);
+              dispatch(setSelectedBarber(barber));
+              dispatch(setSelectedService(null));
+              dispatch(setSelectedDate(""));
+              dispatch(setSelectedTime(null));
             }}
           >
             <div className="flex items-center gap-4">
@@ -325,7 +341,7 @@ const BookingSidebar = () => {
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedService(service);
+                        dispatch(setSelectedService(service));
                       }}
                     >
                       <p className="font-semibold">{service.name}</p>
@@ -348,7 +364,7 @@ const BookingSidebar = () => {
                       type="date"
                       className="w-full p-3 border rounded"
                       value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
+                      onChange={(e) => dispatch(setSelectedDate(e.target.value))}
                       onClick={(e) => e.stopPropagation()}
                       min={new Date().toISOString().split("T")[0]}
                       max={
@@ -376,7 +392,7 @@ const BookingSidebar = () => {
                           }`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedTime(time);
+                            dispatch(setSelectedTime(time));
                           }}
                         >
                           {time}
@@ -397,7 +413,7 @@ const BookingSidebar = () => {
           selectedTime &&
           !showForm && (
             <button
-              onClick={() => setShowForm(true)}
+              onClick={() => dispatch(setShowForm(true))}
               className="mt-6 w-full bg-red-600 text-white py-3 rounded-lg text-lg hover:bg-red-800 transition"
             >
               Confirm Appointment
@@ -500,7 +516,9 @@ const BookingSidebar = () => {
       <Toast
         message={toast.message}
         show={toast.show}
-        onClose={() => setToast((t) => ({ ...t, show: false }))}
+        onClose={() =>
+          dispatch(setToast({ show: false, message: "", type: "success" }))
+        }
         type={toast.type}
       />
     </>
