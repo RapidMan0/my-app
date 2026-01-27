@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
-import emailjs from "emailjs-com";
+import emailjs from "@emailjs/browser";
 import { useAuth } from "./Auth/AuthProvider";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -69,6 +69,11 @@ const BookingSidebar = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  // Инициализируйте emailjs
+  useEffect(() => {
+    emailjs.init("TWMGobjrMR-dkenWF"); // ваш Public Key
+  }, []);
 
   // Fetch barbers and services data
   useEffect(() => {
@@ -222,10 +227,9 @@ const BookingSidebar = () => {
 
     emailjs
       .send(
-        "service_m48lm91", // <-- замените
-        "template_pmcf25u", // <-- замените
+        "service_m48lm91",
+        "template_pmcf25u",
         templateParams,
-        "TWMGobjrMR-dkenWF", // <-- замените
       )
       .then(
         (result) => {

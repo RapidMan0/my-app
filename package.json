@@ -9,6 +9,7 @@
     "lint": "next lint --turbopack"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@prisma/client": "^5.9.0",
@@ -16,7 +17,6 @@
     "bcryptjs": "^2.4.3",
     "blueimp-md5": "^2.19.0",
     "date-fns": "^4.1.0",
-    "emailjs-com": "^3.2.0",
     "framer-motion": "^12.8.0",
     "jsonwebtoken": "^9.0.0",
     "next": "^15.3.0",
