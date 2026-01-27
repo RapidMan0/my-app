@@ -34,19 +34,10 @@ export function AuthProvider({ children }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
-      credentials: "include",
+      credentials: 'same-origin',
     });
-
-    const text = await res.text();
-    let data;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch (e) {
-      data = { error: text || "Invalid response from server" };
-    }
-
-    if (!res.ok) throw new Error(data?.error || `Login failed (${res.status})`);
-
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || "Login failed");
     setAccessToken(data.token);
     localStorage.setItem("accessToken", data.token);
     setUser(data.user);
@@ -58,19 +49,10 @@ export function AuthProvider({ children }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password }),
-      credentials: "include",
+      credentials: 'same-origin',
     });
-
-    const text = await res.text();
-    let data;
-    try {
-      data = text ? JSON.parse(text) : null;
-    } catch (e) {
-      data = { error: text || "Invalid response from server" };
-    }
-
-    if (!res.ok) throw new Error(data?.error || `Register failed (${res.status})`);
-
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.error || "Register failed");
     setAccessToken(data.token);
     localStorage.setItem("accessToken", data.token);
     setUser(data.user);
