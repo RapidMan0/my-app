@@ -53,15 +53,19 @@ export async function POST(req) {
     });
   }
 
-  // Check if user owns this booking
-  if (booking.userId !== user.id) {
+  // Проверяем, что пользователь либо владелец, либо администратор
+  if (booking.userId !== user.id && !user.isAdmin) {
     return new Response(
       JSON.stringify({ error: "Unauthorized to cancel this booking" }),
       { status: 403, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  const updatedBooking = await updateBookingStatus(bookingId, "cancelled", notes || "Cancelled by user");
+  const updatedBooking = await updateBookingStatus(
+    bookingId, 
+    "cancelled", 
+    notes || (user.isAdmin ? "Отменено администратором" : "Отменено пользователем")
+  );
 
   return new Response(
     JSON.stringify({

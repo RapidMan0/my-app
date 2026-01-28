@@ -53,8 +53,8 @@ export async function POST(req) {
     });
   }
 
-  // Check if user owns this booking
-  if (booking.userId !== user.id) {
+  // Проверяем, что пользователь либо владелец, либо администратор
+  if (booking.userId !== user.id && !user.isAdmin) {
     return new Response(
       JSON.stringify({ error: "Unauthorized to reschedule this booking" }),
       { status: 403, headers: { "Content-Type": "application/json" } }
@@ -65,7 +65,7 @@ export async function POST(req) {
     date,
     time,
     status: "confirmed",
-    notes: notes || `Rescheduled from ${booking.date} ${booking.time}`,
+    notes: notes || `Перенесено с ${booking.date} ${booking.time} администратором`,
   });
 
   return new Response(

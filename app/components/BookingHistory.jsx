@@ -56,11 +56,11 @@ const BookingHistory = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "confirmed":
-        return "Подтверждено";
+        return "Confirmed";
       case "cancelled":
-        return "Отменено";
+        return "Cancelled";
       case "rescheduled":
-        return "Перенесено";
+        return "Rescheduled";
       default:
         return status;
     }
@@ -69,7 +69,7 @@ const BookingHistory = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-xl text-gray-600">Загрузка...</div>
+        <div className="text-xl text-gray-600">Loading...</div>
       </div>
     );
   }
@@ -82,17 +82,17 @@ const BookingHistory = () => {
       className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12 px-4"
     >
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-4xl font-bold text-white mb-8">История бронирований</h1>
+        <h1 className="text-4xl font-bold text-white mb-8">Booking History</h1>
 
         {error && (
           <div className="bg-red-500 text-white p-4 rounded-lg mb-6">
-            Ошибка: {error}
+            Error: {error}
           </div>
         )}
 
         {bookings.length === 0 ? (
           <div className="bg-gray-800 rounded-lg p-8 text-center">
-            <p className="text-gray-400 text-lg">У вас нет бронирований</p>
+            <p className="text-gray-400 text-lg">You have no bookings yet</p>
           </div>
         ) : (
           <div className="grid gap-6">
@@ -106,10 +106,11 @@ const BookingHistory = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <h3 className="text-white font-semibold text-lg">
-                      {booking.service} с {booking.barber}
+                      {booking.service} with {booking.barber}
                     </h3>
                     <p className="text-gray-400 mt-2">
-                      📅 {new Date(booking.date).toLocaleDateString("ru-RU")} в {booking.time}
+                      📅 {new Date(booking.date).toLocaleDateString("en-US")} at{" "}
+                      {booking.time}
                     </p>
                   </div>
                   <div className="flex items-start justify-between md:justify-end">
@@ -130,7 +131,7 @@ const BookingHistory = () => {
 
                 {booking.notes && (
                   <div className="bg-gray-700 rounded p-3 text-gray-300 text-sm">
-                    <strong>Примечание:</strong> {booking.notes}
+                    <strong>Note:</strong> {booking.notes}
                   </div>
                 )}
               </motion.div>

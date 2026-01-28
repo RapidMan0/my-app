@@ -32,7 +32,7 @@ const AdminDashboard = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Не удалось загрузить бронирования");
+        throw new Error("Failed to load bookings");
       }
 
       const data = await response.json();
@@ -47,7 +47,7 @@ const AdminDashboard = () => {
   };
 
   const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Вы уверены, что хотите отменить это бронирование?")) {
+    if (!window.confirm("Are you sure you want to cancel this booking?")) {
       return;
     }
 
@@ -58,14 +58,14 @@ const AdminDashboard = () => {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ bookingId, notes: "Отменено администратором" }),
+        body: JSON.stringify({ bookingId, notes: "Cancelled by admin" }),
       });
 
       if (!response.ok) {
-        throw new Error("Не удалось отменить бронирование");
+        throw new Error("Failed to cancel booking");
       }
 
-      setToast({ show: true, message: "Бронирование отменено", type: "success" });
+      setToast({ show: true, message: "Booking cancelled", type: "success" });
       setSelectedBooking(null);
       fetchAllBookings();
       setTimeout(() => setToast({ ...toast, show: false }), 3000);
@@ -96,15 +96,15 @@ const AdminDashboard = () => {
           bookingId: rescheduleModal.bookingId,
           date: rescheduleModal.date,
           time: rescheduleModal.time,
-          notes: "Перенесено администратором",
+          notes: "Rescheduled by admin",
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Не удалось перенести бронирование");
+        throw new Error("Failed to reschedule booking");
       }
 
-      setToast({ show: true, message: "Бронирование перенесено", type: "success" });
+      setToast({ show: true, message: "Booking rescheduled", type: "success" });
       setRescheduleModal({ show: false, bookingId: null, date: "", time: "" });
       fetchAllBookings();
       setTimeout(() => setToast({ ...toast, show: false }), 3000);
@@ -134,11 +134,11 @@ const AdminDashboard = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "confirmed":
-        return "Подтверждено";
+        return "Confirmed";
       case "cancelled":
-        return "Отменено";
+        return "Cancelled";
       case "rescheduled":
-        return "Перенесено";
+        return "Rescheduled";
       default:
         return status;
     }
@@ -154,8 +154,8 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-white mb-4">Доступ запрещен</h1>
-          <p className="text-gray-400">У вас нет прав администратора</p>
+          <h1 className="text-4xl font-bold text-white mb-4">Access Denied</h1>
+          <p className="text-gray-400">You do not have admin permissions</p>
         </div>
       </div>
     );
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <div className="text-xl text-gray-300">Загрузка...</div>
+        <div className="text-xl text-gray-300">Loading...</div>
       </div>
     );
   }
@@ -178,13 +178,13 @@ const AdminDashboard = () => {
     >
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Админ панель</h1>
-          <p className="text-gray-400">Управление бронированиями</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-gray-400">Manage all bookings</p>
         </div>
 
         {error && (
           <div className="bg-red-500 text-white p-4 rounded-lg mb-6">
-            Ошибка: {error}
+            Error: {error}
           </div>
         )}
 
@@ -197,7 +197,7 @@ const AdminDashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Всего бронирований</p>
+                <p className="text-gray-400 text-sm">Total Bookings</p>
                 <p className="text-white text-3xl font-bold">{stats.total}</p>
               </div>
               <div className="text-4xl">📅</div>
@@ -212,7 +212,7 @@ const AdminDashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Подтверждено</p>
+                <p className="text-gray-400 text-sm">Confirmed</p>
                 <p className="text-green-400 text-3xl font-bold">{stats.confirmed}</p>
               </div>
               <div className="text-4xl">✅</div>
@@ -227,7 +227,7 @@ const AdminDashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Отменено</p>
+                <p className="text-gray-400 text-sm">Cancelled</p>
                 <p className="text-red-400 text-3xl font-bold">{stats.cancelled}</p>
               </div>
               <div className="text-4xl">❌</div>
@@ -245,7 +245,7 @@ const AdminDashboard = () => {
                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
             }`}
           >
-            Все
+            All
           </button>
           <button
             onClick={() => setFilter("confirmed")}
@@ -255,7 +255,7 @@ const AdminDashboard = () => {
                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
             }`}
           >
-            Подтверждено
+            Confirmed
           </button>
           <button
             onClick={() => setFilter("cancelled")}
@@ -265,7 +265,7 @@ const AdminDashboard = () => {
                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
             }`}
           >
-            Отменено
+            Cancelled
           </button>
         </div>
 
@@ -278,19 +278,19 @@ const AdminDashboard = () => {
         >
           {getFilteredBookings().length === 0 ? (
             <div className="p-8 text-center">
-              <p className="text-gray-400 text-lg">Нет бронирований</p>
+              <p className="text-gray-400 text-lg">No bookings found</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-700 border-b border-gray-600">
                   <tr>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Клиент</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Услуга</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Барбер</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Дата и время</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Статус</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Действие</th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Client</th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Service</th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Barber</th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Date & Time</th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Status</th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -311,7 +311,7 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 text-gray-300">{booking.service}</td>
                       <td className="px-6 py-4 text-gray-300">{booking.barber}</td>
                       <td className="px-6 py-4 text-gray-300">
-                        {new Date(booking.date).toLocaleDateString("ru-RU")} {booking.time}
+                        {new Date(booking.date).toLocaleDateString("en-US")} {booking.time}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}>
@@ -323,7 +323,7 @@ const AdminDashboard = () => {
                           onClick={() => setSelectedBooking(booking)}
                           className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
                         >
-                          Подробнее
+                          Details
                         </button>
                       </td>
                     </motion.tr>
@@ -349,11 +349,11 @@ const AdminDashboard = () => {
             className="bg-gray-800 rounded-lg p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-2xl font-bold text-white mb-6">Детали бронирования</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Booking Details</h2>
 
             <div className="space-y-4 mb-6">
               <div>
-                <p className="text-gray-400 text-sm">Клиент</p>
+                <p className="text-gray-400 text-sm">Client</p>
                 <p className="text-white font-semibold">{selectedBooking.user.name}</p>
               </div>
               <div>
@@ -361,25 +361,25 @@ const AdminDashboard = () => {
                 <p className="text-white">{selectedBooking.user.email}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Телефон</p>
+                <p className="text-gray-400 text-sm">Phone</p>
                 <p className="text-white">{selectedBooking.phone}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Услуга</p>
+                <p className="text-gray-400 text-sm">Service</p>
                 <p className="text-white">{selectedBooking.service}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Барбер</p>
+                <p className="text-gray-400 text-sm">Barber</p>
                 <p className="text-white">{selectedBooking.barber}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Дата и время</p>
+                <p className="text-gray-400 text-sm">Date & Time</p>
                 <p className="text-white">
-                  {new Date(selectedBooking.date).toLocaleDateString("ru-RU")} {selectedBooking.time}
+                  {new Date(selectedBooking.date).toLocaleDateString("en-US")} {selectedBooking.time}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 text-sm">Статус</p>
+                <p className="text-gray-400 text-sm">Status</p>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
                     selectedBooking.status
@@ -390,7 +390,7 @@ const AdminDashboard = () => {
               </div>
               {selectedBooking.notes && (
                 <div>
-                  <p className="text-gray-400 text-sm">Примечания</p>
+                  <p className="text-gray-400 text-sm">Notes</p>
                   <p className="text-white">{selectedBooking.notes}</p>
                 </div>
               )}
@@ -402,13 +402,13 @@ const AdminDashboard = () => {
                   onClick={() => handleRescheduleClick(selectedBooking)}
                   className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                 >
-                  Перенести
+                  Reschedule
                 </button>
                 <button
                   onClick={() => handleCancelBooking(selectedBooking.id)}
                   className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
                 >
-                  Отменить
+                  Cancel
                 </button>
               </div>
             )}
@@ -417,7 +417,7 @@ const AdminDashboard = () => {
               onClick={() => setSelectedBooking(null)}
               className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
             >
-              Закрыть
+              Close
             </button>
           </motion.div>
         </motion.div>
@@ -437,10 +437,10 @@ const AdminDashboard = () => {
             className="bg-gray-800 rounded-lg p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-2xl font-bold text-white mb-6">Перенести бронирование</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">Reschedule Booking</h2>
 
             <div className="mb-4">
-              <label className="block text-gray-300 font-semibold mb-2">Новая дата</label>
+              <label className="block text-gray-300 font-semibold mb-2">New Date</label>
               <input
                 type="date"
                 value={rescheduleModal.date}
@@ -452,7 +452,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-300 font-semibold mb-2">Новое время</label>
+              <label className="block text-gray-300 font-semibold mb-2">New Time</label>
               <input
                 type="time"
                 value={rescheduleModal.time}
@@ -470,13 +470,13 @@ const AdminDashboard = () => {
                 }
                 className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
-                Отменить
+                Cancel
               </button>
               <button
                 onClick={handleRescheduleSubmit}
                 className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
-                Подтвердить
+                Confirm
               </button>
             </div>
           </motion.div>
