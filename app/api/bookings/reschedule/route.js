@@ -1,9 +1,5 @@
 import { verifyAccessToken } from "../../../../lib/auth.js";
-import {
-  getUserById,
-  incrementHaircutCount,
-  createBooking,
-} from "../../../../lib/prisma.js";
+import { getUserById, getBookingById, updateBooking } from "../../../../lib/prisma.js";
 
 export async function POST(req) {
   const auth = req.headers.get("authorization");
@@ -40,46 +36,46 @@ export async function POST(req) {
   }
 
   const body = await req.json();
-  const { barber, service, date, time, email, phone } = body || {};
+  const { bookingId, date, time, notes } = body || {};
 
-  if (!barber || !service || !date || !time || !email || !phone) {
+  if (!bookingId || !date || !time) {
     return new Response(
-      JSON.stringify({ error: "Missing required booking fields" }),
+      JSON.stringify({ error: "Missing required fields: bookingId, date, time" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // Create booking in database
-  const booking = await createBooking(user.id, {
-    barber,
-    service,
+  const booking = await getBookingById(bookingId);
+  if (!booking) {
+    return new Response(JSON.stringify({ error: "Booking not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  // Check if user owns this booking
+  if (booking.userId !== user.id) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized to reschedule this booking" }),
+      { status: 403, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  const updatedBooking = await updateBooking(bookingId, {
     date,
     time,
-    email,
-    phone,
     status: "confirmed",
+    notes: notes || `Rescheduled from ${booking.date} ${booking.time}`,
   });
-
-  // Increment haircut count
-  const updatedUser = await incrementHaircutCount(user.id);
-
-  const respUser = {
-    id: updatedUser.id,
-    name: updatedUser.name,
-    email: updatedUser.email,
-    haircutCount: updatedUser.haircutCount,
-    createdAt: updatedUser.createdAt,
-  };
 
   return new Response(
     JSON.stringify({
       success: true,
-      message: "Booking created successfully",
-      user: respUser,
-      booking: booking,
+      message: "Booking rescheduled successfully",
+      booking: updatedBooking,
     }),
     {
-      status: 201,
+      status: 200,
       headers: { "Content-Type": "application/json" },
     }
   );

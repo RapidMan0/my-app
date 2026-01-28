@@ -90,7 +90,15 @@ const Header = () => {
                   )}
                 </div>
                 <span className="font-medium">{user.name || user.email}</span>
-                                <button
+                <a href="/bookings" className="text-blue-400 hover:text-blue-300 px-2 py-1 rounded text-sm">
+                  📅 История
+                </a>
+                {user.isAdmin && (
+                  <a href="/admin" className="text-purple-400 hover:text-purple-300 px-2 py-1 rounded text-sm">
+                    ⚙️ Админ
+                  </a>
+                )}
+                <button
                   onClick={async () => {
                     setLoading(true);
                     try {
@@ -181,8 +189,18 @@ const Header = () => {
                   </button>
                 </div>
               ) : (
-                <div className="space-x-2">
-                  <span>{user.name || user.email}</span>
+                <div className="space-y-2">
+                  <div className="space-x-2">
+                    <span>{user.name || user.email}</span>
+                  </div>
+                  <a href="/bookings" className="block text-blue-400 hover:text-blue-300 text-sm">
+                    📅 История бронирований
+                  </a>
+                  {user.isAdmin && (
+                    <a href="/admin" className="block text-purple-400 hover:text-purple-300 text-sm">
+                      ⚙️ Админ панель
+                    </a>
+                  )}
                   <button
                     onClick={async () => {
                       setLoading(true);

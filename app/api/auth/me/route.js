@@ -36,6 +36,7 @@ export async function GET(req) {
     name: user.name,
     email: user.email,
     haircutCount: user.haircutCount,
+    isAdmin: user.isAdmin,
     createdAt: user.createdAt,
   };
 

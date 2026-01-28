@@ -1,9 +1,5 @@
 import { verifyAccessToken } from "../../../../lib/auth.js";
-import {
-  getUserById,
-  incrementHaircutCount,
-  createBooking,
-} from "../../../../lib/prisma.js";
+import { getUserById, getBookingById, updateBookingStatus } from "../../../../lib/prisma.js";
 
 export async function POST(req) {
   const auth = req.headers.get("authorization");
@@ -40,46 +36,41 @@ export async function POST(req) {
   }
 
   const body = await req.json();
-  const { barber, service, date, time, email, phone } = body || {};
+  const { bookingId, notes } = body || {};
 
-  if (!barber || !service || !date || !time || !email || !phone) {
+  if (!bookingId) {
     return new Response(
-      JSON.stringify({ error: "Missing required booking fields" }),
+      JSON.stringify({ error: "Missing bookingId" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // Create booking in database
-  const booking = await createBooking(user.id, {
-    barber,
-    service,
-    date,
-    time,
-    email,
-    phone,
-    status: "confirmed",
-  });
+  const booking = await getBookingById(bookingId);
+  if (!booking) {
+    return new Response(JSON.stringify({ error: "Booking not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
-  // Increment haircut count
-  const updatedUser = await incrementHaircutCount(user.id);
+  // Check if user owns this booking
+  if (booking.userId !== user.id) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized to cancel this booking" }),
+      { status: 403, headers: { "Content-Type": "application/json" } }
+    );
+  }
 
-  const respUser = {
-    id: updatedUser.id,
-    name: updatedUser.name,
-    email: updatedUser.email,
-    haircutCount: updatedUser.haircutCount,
-    createdAt: updatedUser.createdAt,
-  };
+  const updatedBooking = await updateBookingStatus(bookingId, "cancelled", notes || "Cancelled by user");
 
   return new Response(
     JSON.stringify({
       success: true,
-      message: "Booking created successfully",
-      user: respUser,
-      booking: booking,
+      message: "Booking cancelled successfully",
+      booking: updatedBooking,
     }),
     {
-      status: 201,
+      status: 200,
       headers: { "Content-Type": "application/json" },
     }
   );

@@ -13,8 +13,10 @@ model User {
   name              String?
   password          String
   haircutCount      Int            @default(0)
+  isAdmin           Boolean        @default(false)
   createdAt         DateTime       @default(now())
   refreshTokens     RefreshToken[]
+  bookings          Booking[]
 }
 
 model RefreshToken {
@@ -25,4 +27,20 @@ model RefreshToken {
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
   userId    String
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  barber    String
+  service   String
+  date      String
+  time      String
+  email     String
+  phone     String
+  status    String   @default("confirmed") // confirmed, cancelled, rescheduled
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

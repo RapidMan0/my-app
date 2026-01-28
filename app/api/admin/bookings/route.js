@@ -1,11 +1,7 @@
 import { verifyAccessToken } from "../../../../lib/auth.js";
-import {
-  getUserById,
-  incrementHaircutCount,
-  createBooking,
-} from "../../../../lib/prisma.js";
+import { getUserById, getAllBookings } from "../../../../lib/prisma.js";
 
-export async function POST(req) {
+export async function GET(req) {
   const auth = req.headers.get("authorization");
   if (!auth) {
     return new Response(
@@ -39,47 +35,24 @@ export async function POST(req) {
     });
   }
 
-  const body = await req.json();
-  const { barber, service, date, time, email, phone } = body || {};
-
-  if (!barber || !service || !date || !time || !email || !phone) {
+  // Check if user is admin
+  if (!user.isAdmin) {
     return new Response(
-      JSON.stringify({ error: "Missing required booking fields" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ error: "Unauthorized - Admin access required" }),
+      { status: 403, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  // Create booking in database
-  const booking = await createBooking(user.id, {
-    barber,
-    service,
-    date,
-    time,
-    email,
-    phone,
-    status: "confirmed",
-  });
-
-  // Increment haircut count
-  const updatedUser = await incrementHaircutCount(user.id);
-
-  const respUser = {
-    id: updatedUser.id,
-    name: updatedUser.name,
-    email: updatedUser.email,
-    haircutCount: updatedUser.haircutCount,
-    createdAt: updatedUser.createdAt,
-  };
+  const bookings = await getAllBookings();
 
   return new Response(
     JSON.stringify({
       success: true,
-      message: "Booking created successfully",
-      user: respUser,
-      booking: booking,
+      bookings: bookings,
+      total: bookings.length,
     }),
     {
-      status: 201,
+      status: 200,
       headers: { "Content-Type": "application/json" },
     }
   );
