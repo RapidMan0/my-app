@@ -7,7 +7,7 @@ export async function GET(req) {
           "X-Master-Key":
             "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -16,13 +16,10 @@ export async function GET(req) {
 
     const data = await response.json();
 
-    return new Response(
-      JSON.stringify(data.record),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify(data.record), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     console.error("Error fetching gallery:", error);
     return new Response(
@@ -30,7 +27,7 @@ export async function GET(req) {
       {
         status: 500,
         headers: { "Content-Type": "application/json" },
-      }
+      },
     );
   }
 }

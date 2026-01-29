@@ -134,7 +134,7 @@ const BookingSidebar = () => {
     dispatch(setToast({ show: true, message, type }));
     setTimeout(
       () => dispatch(setToast({ show: false, message: "", type: "success" })),
-      3500
+      3500,
     );
   };
 
@@ -169,81 +169,76 @@ const BookingSidebar = () => {
         percent: discountPercent,
         amount: discountAmount,
         message: discountMessage,
-      })
+      }),
     );
     dispatch(setFinalPrice(Math.round(final)));
   }, [selectedService, user, dispatch]);
 
   const onSubmit = async (data) => {
-    // If user is logged in, make API call to record booking
-    if (user && accessToken) {
-      try {
-        const response = await fetch("/api/bookings/create", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            barber: selectedBarber.name,
-            service: selectedService.name,
-            date: selectedDate,
-            time: selectedTime,
-            email: data.email,
-            phone: data.phone,
-          }),
-        });
+    // Оптимистично закрываем UI сразу
+    dispatch(setShowForm(false));
+    dispatch(setIsOpen(false));
+    dispatch(setShowBookingButton(true));
 
-        if (!response.ok) {
-          const error = await response.json();
-          showToast(error.error || "Failed to create booking", "error");
-          return;
-        }
+    // Дать браузеру обновить интерфейс
+    await new Promise((r) => requestAnimationFrame(() => r()));
 
-        const result = await response.json();
-        // Update user in context with new haircut count
-        if (result.user) {
-          updateUser(result.user);
-        }
-      } catch (err) {
-        console.error("Booking error:", err);
-        showToast("Failed to create booking. Try again.", "error");
-        return;
-      }
-    }
-
-    // Send email
-    const templateParams = {
-      barber: selectedBarber.name,
-      service: selectedService.name,
-      date: selectedDate,
-      time: selectedTime,
-      email: data.email,
-      phone: data.phone,
-      price: `${finalPrice} mdl`,
-      originalPrice: selectedService.price,
-      discount: discount.percent,
-    };
-
-    emailjs
-      .send(
-        "service_m48lm91",
-        "template_pmcf25u",
-        templateParams,
-      )
-      .then(
-        (result) => {
+    // Выполняем сетевые операции в фоне, не блокируя UI
+    (async () => {
+      // Сохранение брони на сервере, если пользователь авторизован
+      if (user && accessToken) {
+        try {
+          const res = await fetch("/api/bookings/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+              barber: selectedBarber.name,
+              service: selectedService.name,
+              date: selectedDate,
+              time: selectedTime,
+              email: data.email,
+              phone: data.phone,
+              price: `${finalPrice} mdl`,
+              originalPrice: selectedService.price,
+              discount: discount.percent,
+            }),
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            showToast(err.error || "Failed to create booking", "error");
+            return;
+          }
+          // при успешном сохранении можно обновить стор/данные
           showToast(`Booking confirmed! ${discount.message}`, "success");
-          dispatch(setShowForm(false));
-          dispatch(setIsOpen(false));
-          dispatch(setShowBookingButton(true));
           dispatch(resetBooking());
-        },
-        (error) => {
-          console.error("Email error:", error);
-          showToast("Failed to send email. Try again later.", "error");
-        },
-      );
+        } catch (err) {
+          console.error("Save booking error:", err);
+          showToast("Network error while saving booking", "error");
+        }
+      }
+
+      // Отправка email (тоже в фоне)
+      try {
+        const templateParams = {
+          barber: selectedBarber.name,
+          service: selectedService.name,
+          date: selectedDate,
+          time: selectedTime,
+          email: data.email,
+          phone: data.phone,
+          price: `${finalPrice} mdl`,
+          originalPrice: selectedService.price,
+          discount: discount.percent,
+        };
+        await emailjs.send("service_m48lm91", "template_pmcf25u", templateParams);
+      } catch (error) {
+        console.error("Email error:", error);
+        showToast("Failed to send email. Try again later.", "error");
+      }
+    })();
   };
 
   return (
@@ -368,7 +363,9 @@ const BookingSidebar = () => {
                       type="date"
                       className="w-full p-3 border rounded"
                       value={selectedDate}
-                      onChange={(e) => dispatch(setSelectedDate(e.target.value))}
+                      onChange={(e) =>
+                        dispatch(setSelectedDate(e.target.value))
+                      }
                       onClick={(e) => e.stopPropagation()}
                       min={new Date().toISOString().split("T")[0]}
                       max={

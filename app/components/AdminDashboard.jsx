@@ -47,30 +47,31 @@ const AdminDashboard = () => {
   };
 
   const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to cancel this booking?")) {
+    if (!window.confirm("Are you sure you want to permanently delete this booking? This action cannot be undone.")) {
       return;
     }
 
     try {
-      const response = await fetch("/api/bookings/cancel", {
-        method: "POST",
+      const response = await fetch(`/api/admin/bookings/${bookingId}`, {
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ bookingId, notes: "Cancelled by admin" }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to cancel booking");
+        const err = await response.json().catch(() => ({ message: "Failed to delete booking" }));
+        throw new Error(err.message || "Failed to delete booking");
       }
 
-      setToast({ show: true, message: "Booking cancelled", type: "success" });
+      setToast({ show: true, message: "Booking removed from database", type: "success" });
+      // Обновляем список локально или заново загружаем
+      setBookings((prev) => prev.filter((b) => b.id !== bookingId));
       setSelectedBooking(null);
-      fetchAllBookings();
-      setTimeout(() => setToast({ ...toast, show: false }), 3000);
+      setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
     } catch (err) {
-      setToast({ show: true, message: err.message, type: "error" });
+      setToast({ show: true, message: err.message || "Delete failed", type: "error" });
     }
   };
 
@@ -304,8 +305,12 @@ const AdminDashboard = () => {
                     >
                       <td className="px-6 py-4 text-gray-300">
                         <div>
-                          <p className="font-semibold">{booking.user.name}</p>
-                          <p className="text-sm text-gray-400">{booking.user.email}</p>
+                          <p className="font-semibold">
+                            {booking.clientName || booking.name || booking.user?.name || (booking.email || "").split("@")[0] || "Unknown"}
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            {booking.email || booking.user?.email || "—"}
+                          </p>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-gray-300">{booking.service}</td>
@@ -354,11 +359,13 @@ const AdminDashboard = () => {
             <div className="space-y-4 mb-6">
               <div>
                 <p className="text-gray-400 text-sm">Client</p>
-                <p className="text-white font-semibold">{selectedBooking.user.name}</p>
+                <p className="text-white font-semibold">
+                  {selectedBooking.clientName || selectedBooking.name || selectedBooking.user?.name || (selectedBooking.email || "").split("@")[0] || "Unknown"}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Email</p>
-                <p className="text-white">{selectedBooking.user.email}</p>
+                <p className="text-white">{selectedBooking.email || selectedBooking.user?.email || "—"}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Phone</p>
