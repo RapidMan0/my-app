@@ -10,9 +10,18 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
-  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "success",
+  });
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [rescheduleModal, setRescheduleModal] = useState({ show: false, bookingId: null, date: "", time: "" });
+  const [rescheduleModal, setRescheduleModal] = useState({
+    show: false,
+    bookingId: null,
+    date: "",
+    time: "",
+  });
 
   useEffect(() => {
     if (user?.isAdmin) {
@@ -47,7 +56,11 @@ const AdminDashboard = () => {
   };
 
   const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm("Are you sure you want to permanently delete this booking? This action cannot be undone.")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to permanently delete this booking? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
@@ -61,17 +74,30 @@ const AdminDashboard = () => {
       });
 
       if (!response.ok) {
-        const err = await response.json().catch(() => ({ message: "Failed to delete booking" }));
+        const err = await response
+          .json()
+          .catch(() => ({ message: "Failed to delete booking" }));
         throw new Error(err.message || "Failed to delete booking");
       }
 
-      setToast({ show: true, message: "Booking removed from database", type: "success" });
+      setToast({
+        show: true,
+        message: "Booking removed from database",
+        type: "success",
+      });
       // Обновляем список локально или заново загружаем
       setBookings((prev) => prev.filter((b) => b.id !== bookingId));
       setSelectedBooking(null);
-      setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
+      setTimeout(
+        () => setToast({ show: false, message: "", type: "success" }),
+        3000,
+      );
     } catch (err) {
-      setToast({ show: true, message: err.message || "Delete failed", type: "error" });
+      setToast({
+        show: true,
+        message: err.message || "Delete failed",
+        type: "error",
+      });
     }
   };
 
@@ -179,7 +205,9 @@ const AdminDashboard = () => {
     >
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Admin Dashboard
+          </h1>
           <p className="text-gray-400">Manage all bookings</p>
         </div>
 
@@ -214,7 +242,9 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Confirmed</p>
-                <p className="text-green-400 text-3xl font-bold">{stats.confirmed}</p>
+                <p className="text-green-400 text-3xl font-bold">
+                  {stats.confirmed}
+                </p>
               </div>
               <div className="text-4xl">✅</div>
             </div>
@@ -229,7 +259,9 @@ const AdminDashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Cancelled</p>
-                <p className="text-red-400 text-3xl font-bold">{stats.cancelled}</p>
+                <p className="text-red-400 text-3xl font-bold">
+                  {stats.cancelled}
+                </p>
               </div>
               <div className="text-4xl">❌</div>
             </div>
@@ -286,12 +318,24 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead className="bg-gray-700 border-b border-gray-600">
                   <tr>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Client</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Service</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Barber</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Date & Time</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Status</th>
-                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">Action</th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                      Client
+                    </th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                      Service
+                    </th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                      Barber
+                    </th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                      Date & Time
+                    </th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -306,20 +350,31 @@ const AdminDashboard = () => {
                       <td className="px-6 py-4 text-gray-300">
                         <div>
                           <p className="font-semibold">
-                            {booking.clientName || booking.name || booking.user?.name || (booking.email || "").split("@")[0] || "Unknown"}
+                            {booking.clientName ||
+                              booking.name ||
+                              booking.user?.name ||
+                              (booking.email || "").split("@")[0] ||
+                              "Unknown"}
                           </p>
                           <p className="text-sm text-gray-400">
                             {booking.email || booking.user?.email || "—"}
                           </p>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-300">{booking.service}</td>
-                      <td className="px-6 py-4 text-gray-300">{booking.barber}</td>
                       <td className="px-6 py-4 text-gray-300">
-                        {new Date(booking.date).toLocaleDateString("en-US")} {booking.time}
+                        {booking.service}
+                      </td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {booking.barber}
+                      </td>
+                      <td className="px-6 py-4 text-gray-300">
+                        {new Date(booking.date).toLocaleDateString("en-US")}{" "}
+                        {booking.time}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}
+                        >
                           {getStatusText(booking.status)}
                         </span>
                       </td>
@@ -354,18 +409,26 @@ const AdminDashboard = () => {
             className="bg-gray-800 rounded-lg p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-2xl font-bold text-white mb-6">Booking Details</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">
+              Booking Details
+            </h2>
 
             <div className="space-y-4 mb-6">
               <div>
                 <p className="text-gray-400 text-sm">Client</p>
                 <p className="text-white font-semibold">
-                  {selectedBooking.clientName || selectedBooking.name || selectedBooking.user?.name || (selectedBooking.email || "").split("@")[0] || "Unknown"}
+                  {selectedBooking.clientName ||
+                    selectedBooking.name ||
+                    selectedBooking.user?.name ||
+                    (selectedBooking.email || "").split("@")[0] ||
+                    "Unknown"}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Email</p>
-                <p className="text-white">{selectedBooking.email || selectedBooking.user?.email || "—"}</p>
+                <p className="text-white">
+                  {selectedBooking.email || selectedBooking.user?.email || "—"}
+                </p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Phone</p>
@@ -382,14 +445,15 @@ const AdminDashboard = () => {
               <div>
                 <p className="text-gray-400 text-sm">Date & Time</p>
                 <p className="text-white">
-                  {new Date(selectedBooking.date).toLocaleDateString("en-US")} {selectedBooking.time}
+                  {new Date(selectedBooking.date).toLocaleDateString("en-US")}{" "}
+                  {selectedBooking.time}
                 </p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">Status</p>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
-                    selectedBooking.status
+                    selectedBooking.status,
                   )}`}
                 >
                   {getStatusText(selectedBooking.status)}
@@ -436,7 +500,14 @@ const AdminDashboard = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          onClick={() => setRescheduleModal({ show: false, bookingId: null, date: "", time: "" })}
+          onClick={() =>
+            setRescheduleModal({
+              show: false,
+              bookingId: null,
+              date: "",
+              time: "",
+            })
+          }
         >
           <motion.div
             initial={{ scale: 0.9 }}
@@ -444,27 +515,39 @@ const AdminDashboard = () => {
             className="bg-gray-800 rounded-lg p-8 w-full max-w-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-2xl font-bold text-white mb-6">Reschedule Booking</h2>
+            <h2 className="text-2xl font-bold text-white mb-6">
+              Reschedule Booking
+            </h2>
 
             <div className="mb-4">
-              <label className="block text-gray-300 font-semibold mb-2">New Date</label>
+              <label className="block text-gray-300 font-semibold mb-2">
+                New Date
+              </label>
               <input
                 type="date"
                 value={rescheduleModal.date}
                 onChange={(e) =>
-                  setRescheduleModal({ ...rescheduleModal, date: e.target.value })
+                  setRescheduleModal({
+                    ...rescheduleModal,
+                    date: e.target.value,
+                  })
                 }
                 className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none"
               />
             </div>
 
             <div className="mb-6">
-              <label className="block text-gray-300 font-semibold mb-2">New Time</label>
+              <label className="block text-gray-300 font-semibold mb-2">
+                New Time
+              </label>
               <input
                 type="time"
                 value={rescheduleModal.time}
                 onChange={(e) =>
-                  setRescheduleModal({ ...rescheduleModal, time: e.target.value })
+                  setRescheduleModal({
+                    ...rescheduleModal,
+                    time: e.target.value,
+                  })
                 }
                 className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none"
               />
@@ -473,7 +556,12 @@ const AdminDashboard = () => {
             <div className="flex gap-4">
               <button
                 onClick={() =>
-                  setRescheduleModal({ show: false, bookingId: null, date: "", time: "" })
+                  setRescheduleModal({
+                    show: false,
+                    bookingId: null,
+                    date: "",
+                    time: "",
+                  })
                 }
                 className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
               >
