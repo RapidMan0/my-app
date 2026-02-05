@@ -28,8 +28,8 @@ const About = () => {
       className="py-16 bg-[#2a2a2a]"
       style={{ textShadow: "2px 2px 4px rgba(0, 0, 0, 0.7)" }}
     >
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-28 px-4">
-        <div className="grid gap-4 w-full md:w-1/2">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-6 md:gap-12 lg:gap-28 px-4 md:px-6">
+        <div className="grid gap-4 w-full md:w-1/2 px-2 md:px-0">
           <div>
             <img
               className="h-auto w-full max-w-full rounded-lg object-cover object-center md:h-[480px] transition duration-500"
@@ -52,7 +52,7 @@ const About = () => {
             ))}
           </div>
         </div>
-        <div className="w-full md:w-1/2 space-y-4">
+        <div className="w-full md:w-1/2 space-y-4 px-2 md:px-0">
           <h2 className="text-4xl font-bold text-white">About Us</h2>
           <p className="text-white text-lg">
             Welcome to SharpMen, where elegance meets style. Our team of

@@ -54,7 +54,7 @@ const Header = () => {
 
   return (
     <header className="bg-black text-white shadow-md">
-      <nav className="container mx-auto px-4 py-4">
+      <nav className="container mx-auto px-4 py-2">
         {/* Desktop меню */}
         <div className="flex items-center justify-between">
           <ul className="hidden md:flex space-x-14 font-semibold">
@@ -80,25 +80,25 @@ const Header = () => {
             ))}
           </ul>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-2 lg:space-x-4">
             {!user ? (
               <>
                 <button
                   onClick={() => setShowLogin(true)}
-                  className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition"
+                  className="bg-red-500 px-2 lg:px-3 py-1 rounded hover:bg-red-600 transition text-sm lg:text-base"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => setShowRegister(true)}
-                  className="border border-white px-3 py-1 rounded hover:bg-white hover:text-black transition"
+                  className="border border-white px-2 lg:px-3 py-1 rounded hover:bg-white hover:text-black transition text-sm lg:text-base"
                 >
                   Register
                 </button>
               </>
             ) : (
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-gray-600 overflow-hidden">
+              <div className="flex items-center space-x-2 lg:space-x-3">
+                <div className="w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-gray-600 overflow-hidden flex-shrink-0">
                   {user.email ? (
                     <img
                       src={`https://www.gravatar.com/avatar/${md5(
@@ -108,7 +108,7 @@ const Header = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-white font-medium">
+                    <div className="w-full h-full flex items-center justify-center text-white font-medium text-xs">
                       {(user.name || user.email || "")
                         .split(" ")
                         .map((s) => s[0])
@@ -118,25 +118,33 @@ const Header = () => {
                     </div>
                   )}
                 </div>
-                <span className="font-medium">{user.name || user.email}</span>
+                <span className="font-medium text-sm lg:text-base hidden lg:inline">
+                  {user.name || user.email}
+                </span>
                 <Link
                   href="/bookings"
-                  className="text-blue-400 hover:text-blue-300 px-2 py-1 rounded text-sm transition"
+                  className="text-blue-400 hover:text-blue-300 px-3 lg:px-4 py-2 rounded text-xs lg:text-sm transition flex items-center gap-2 hover:bg-blue-900/20"
                 >
-                  📅 Bookings
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3h-1V2h-2v1H8V2H6v1H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                  </svg>
+                  <span className="hidden lg:inline">Bookings</span>
                 </Link>
                 {user.isAdmin && (
                   <Link
                     href="/admin"
-                    className="text-purple-400 hover:text-purple-300 px-2 py-1 rounded text-sm transition"
+                    className="text-purple-400 hover:text-purple-300 px-3 lg:px-4 py-2 rounded text-xs lg:text-sm transition flex items-center gap-2 hover:bg-purple-900/20"
                   >
-                    ⚙️ Admin
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.64l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.07.49.12.64l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.64l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.64l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                    <span className="hidden lg:inline">Admin</span>
                   </Link>
                 )}
                 <button
                   onClick={handleLogout}
                   disabled={loading}
-                  className="bg-gray-700 px-2 py-1 rounded hover:bg-gray-600 transition disabled:opacity-50"
+                  className="bg-gray-700 px-1.5 lg:px-2 py-1 rounded hover:bg-gray-600 transition disabled:opacity-50 text-xs lg:text-sm"
                 >
                   {loading ? "..." : "Logout"}
                 </button>
@@ -262,7 +270,10 @@ const Header = () => {
                     className="block text-blue-400 hover:text-blue-300 text-sm py-2 transition"
                     onClick={() => setIsOpen(false)}
                   >
-                    📅 Bookings
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M19 3h-1V2h-2v1H8V2H6v1H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/>
+                    </svg>
+                    Bookings
                   </Link>
                   {user.isAdmin && (
                     <Link
@@ -270,7 +281,10 @@ const Header = () => {
                       className="block text-purple-400 hover:text-purple-300 text-sm py-2 transition"
                       onClick={() => setIsOpen(false)}
                     >
-                      ⚙️ Admin Dashboard
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 inline mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.64l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.07.49.12.64l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.64l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.64l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                      </svg>
+                      Admin Dashboard
                     </Link>
                   )}
                   <button
