@@ -90,7 +90,7 @@ const PricingTabs = () => {
               <img
                 key={`${tab}-${idx}`}
                 src={`/${tab}-${idx + 1}.jpg`}
-                alt=""
+                alt={`${tab}-${idx + 1}.jpg`}
                 loading="eager"
                 decoding="async"
               />
@@ -152,7 +152,7 @@ const PricingTabs = () => {
                   <img
                     src={`/${activeTab}-${index + 1}.jpg`}
                     className="w-full h-64 shadow-lg object-cover rounded-md mt-4"
-                    alt=""
+                    alt={`${activeTab}-${index + 1}.jpg`}
                   />
                 </div>
               </div>

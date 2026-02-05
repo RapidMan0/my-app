@@ -94,7 +94,7 @@ const GalleryWithFilters = () => {
                   <img
                     className="w-full h-full object-cover"
                     src={image.src}
-                    alt=""
+                    alt={image.alt}
                     loading="lazy"
                     decoding="async"
                   />
