@@ -211,9 +211,16 @@ const BookingSidebar = () => {
             showToast(err.error || "Failed to create booking", "error");
             return;
           }
-          // при успешном сохранении можно обновить стор/данные
+
+          // Получаем обновленного пользователя из ответа сервера
+          const responseData = await res.json();
           showToast(`Booking confirmed! ${discount.message}`, "success");
           dispatch(resetBooking());
+
+          // Обновляем пользователя в контексте auth
+          if (updateUser && responseData.user) {
+            await updateUser(responseData.user); // передай обновленные данные
+          }
         } catch (err) {
           console.error("Save booking error:", err);
           showToast("Network error while saving booking", "error");
@@ -233,7 +240,11 @@ const BookingSidebar = () => {
           originalPrice: selectedService.price,
           discount: discount.percent,
         };
-        await emailjs.send("service_m48lm91", "template_pmcf25u", templateParams);
+        await emailjs.send(
+          "service_m48lm91",
+          "template_pmcf25u",
+          templateParams,
+        );
       } catch (error) {
         console.error("Email error:", error);
         showToast("Failed to send email. Try again later.", "error");
@@ -273,6 +284,7 @@ const BookingSidebar = () => {
                 dispatch(setSelectedService(null));
                 dispatch(setSelectedDate(""));
                 dispatch(setSelectedTime(null));
+                dispatch(setShowForm(false)); // скрываем панель с ценой/формой при возврате
               } else {
                 dispatch(setIsOpen(false));
                 dispatch(setShowBookingButton(true));
@@ -436,16 +448,17 @@ const BookingSidebar = () => {
                   {user?.haircutCount || 0}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-700">
-                  Original price:
-                </span>
-                <span className="text-lg text-gray-500 line-through">
-                  {selectedService?.price}
-                </span>
-              </div>
-              {discount.percent > 0 && (
+
+              {discount.percent > 0 ? (
                 <>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium text-gray-700">
+                      Original price:
+                    </span>
+                    <span className="text-lg text-gray-500 line-through">
+                      {selectedService?.price}
+                    </span>
+                  </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-sm font-semibold text-green-600">
                       Discount ({discount.percent}%):
@@ -458,11 +471,19 @@ const BookingSidebar = () => {
                     {discount.message}
                   </p>
                 </>
+              ) : (
+                <div className="bg-blue-100 p-3 rounded-lg mt-3 mb-3">
+                  <p className="text-sm text-blue-800 font-medium">
+                    💡 Complete 3 haircuts to unlock a 10% discount!
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Progress: {user?.haircutCount || 0} / 3
+                  </p>
+                </div>
               )}
+
               <div className="flex justify-between items-center mt-3 pt-3 border-t border-blue-200">
-                <span className="text-lg font-bold text-gray-900">
-                  Final price:
-                </span>
+                <span className="text-lg font-bold text-gray-900">Price:</span>
                 <span className="text-2xl font-bold text-red-600">
                   {finalPrice} mdl
                 </span>

@@ -68,8 +68,8 @@ export function AuthProvider({ children }) {
     setUser(null);
   }
 
-  function updateUser(userData) {
-    setUser(userData);
+  const updateUser = async (newUserData) => {
+    setUser(newUserData); // или обновить через API
   }
 
   return (
