@@ -252,6 +252,30 @@ const BookingSidebar = () => {
     })();
   };
 
+  // Вычисляем базовую цену и отображаемую цену
+  const basePrice = selectedService
+    ? parseInt(selectedService.price.replace(/\D/g, ""))
+    : 0;
+
+  const displayPrice =
+    discount.percent > 0 ? finalPrice : basePrice;
+
+  // Логика для подсказки о следующей скидке
+  const visits = user?.haircutCount || 0;
+  let nextTarget = null;
+  let nextDiscount = null;
+
+  if (visits < 3) {
+    nextTarget = 3;
+    nextDiscount = 10;
+  } else if (visits < 6) {
+    nextTarget = 6;
+    nextDiscount = 15;
+  } else if (visits < 10) {
+    nextTarget = 10;
+    nextDiscount = 20;
+  }
+
   return (
     <>
       {showBookingButton && (
@@ -445,7 +469,7 @@ const BookingSidebar = () => {
                   Total visits:
                 </span>
                 <span className="text-lg font-bold text-blue-600">
-                  {user?.haircutCount || 0}
+                  {visits}
                 </span>
               </div>
 
@@ -472,20 +496,22 @@ const BookingSidebar = () => {
                   </p>
                 </>
               ) : (
-                <div className="bg-blue-100 p-3 rounded-lg mt-3 mb-3">
-                  <p className="text-sm text-blue-800 font-medium">
-                    💡 Complete 3 haircuts to unlock a 10% discount!
-                  </p>
-                  <p className="text-xs text-blue-700 mt-1">
-                    Progress: {user?.haircutCount || 0} / 3
-                  </p>
-                </div>
+                nextTarget && (
+                  <div className="bg-blue-100 p-3 rounded-lg mt-3 mb-3">
+                    <p className="text-sm text-blue-800 font-medium">
+                      💡 Visit {nextTarget - visits} more time{nextTarget - visits !== 1 ? 's' : ''} to unlock {nextDiscount}% discount!
+                    </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      Progress: {visits} / {nextTarget}
+                    </p>
+                  </div>
+                )
               )}
 
               <div className="flex justify-between items-center mt-3 pt-3 border-t border-blue-200">
                 <span className="text-lg font-bold text-gray-900">Price:</span>
                 <span className="text-2xl font-bold text-red-600">
-                  {finalPrice} mdl
+                  {displayPrice} mdl
                 </span>
               </div>
             </div>
