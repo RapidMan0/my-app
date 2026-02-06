@@ -257,8 +257,7 @@ const BookingSidebar = () => {
     ? parseInt(selectedService.price.replace(/\D/g, ""))
     : 0;
 
-  const displayPrice =
-    discount.percent > 0 ? finalPrice : basePrice;
+  const displayPrice = discount.percent > 0 ? finalPrice : basePrice;
 
   // Логика для подсказки о следующей скидке
   const visits = user?.haircutCount || 0;
@@ -499,7 +498,9 @@ const BookingSidebar = () => {
                 nextTarget && (
                   <div className="bg-blue-100 p-3 rounded-lg mt-3 mb-3">
                     <p className="text-sm text-blue-800 font-medium">
-                      💡 Visit {nextTarget - visits} more time{nextTarget - visits !== 1 ? 's' : ''} to unlock {nextDiscount}% discount!
+                      💡 Visit {nextTarget - visits} more time
+                      {nextTarget - visits !== 1 ? "s" : ""} to unlock{" "}
+                      {nextDiscount}% discount!
                     </p>
                     <p className="text-xs text-blue-700 mt-1">
                       Progress: {visits} / {nextTarget}
@@ -510,7 +511,7 @@ const BookingSidebar = () => {
 
               <div className="flex justify-between items-center mt-3 pt-3 border-t border-blue-200">
                 <span className="text-lg font-bold text-gray-900">Price:</span>
-                <span className="text-2xl font-bold text-red-600">
+                <span className="text-2xl font-bold text-blue-700">
                   {displayPrice} mdl
                 </span>
               </div>
