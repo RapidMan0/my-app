@@ -108,7 +108,7 @@ const BookingHistory = () => {
                     <h3 className="text-white font-semibold text-lg">
                       {booking.service} with {booking.barber}
                     </h3>
-                    <p className="text-gray-400 mt-2">
+                    <p className="text-gray-100 mt-2">
                       📅 {new Date(booking.date).toLocaleDateString("en-US")} at{" "}
                       {booking.time}
                     </p>
@@ -124,7 +124,7 @@ const BookingHistory = () => {
                   </div>
                 </div>
 
-                <div className="text-gray-400 mb-4 text-sm">
+                <div className="text-gray-100 mb-4 text-sm">
                   <p>📞 {booking.phone}</p>
                   <p>✉️ {booking.email}</p>
                 </div>
