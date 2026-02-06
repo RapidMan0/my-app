@@ -68,6 +68,7 @@ const BookingSidebar = () => {
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm();
 
   // Инициализируйте emailjs
@@ -190,6 +191,9 @@ const BookingSidebar = () => {
     dispatch(setShowForm(false));
     dispatch(setIsOpen(false));
     dispatch(setShowBookingButton(true));
+    
+    // Очищаем форму после submit
+    reset();
 
     // Дать браузеру обновить интерфейс
     await new Promise((r) => requestAnimationFrame(() => r()));
