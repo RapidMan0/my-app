@@ -3,6 +3,7 @@ import {
   getUserById,
   incrementHaircutCount,
   createBooking,
+  updateUserDiscounts,
 } from "../../../../lib/prisma.js";
 
 export async function POST(req) {
@@ -40,13 +41,27 @@ export async function POST(req) {
   }
 
   const body = await req.json();
-  const { barber, service, date, time, email, phone } = body || {};
+  const { barber, service, date, time, email, phone, discount } = body || {};
 
   if (!barber || !service || !date || !time || !email || !phone) {
     return new Response(
       JSON.stringify({ error: "Missing required booking fields" }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  // Определяем текущий активный порог скидки
+  const visits = user.haircutCount;
+  const usedDiscountsStr = user.usedDiscounts || "[]";
+  const used = JSON.parse(usedDiscountsStr);
+  let currentThreshold = null;
+
+  if (visits >= 10 && !used.includes(10)) {
+    currentThreshold = 10;
+  } else if (visits >= 6 && !used.includes(6)) {
+    currentThreshold = 6;
+  } else if (visits >= 3 && !used.includes(3)) {
+    currentThreshold = 3;
   }
 
   // Create booking in database
@@ -61,13 +76,21 @@ export async function POST(req) {
   });
 
   // Increment haircut count
-  const updatedUser = await incrementHaircutCount(user.id);
+  let updatedUser = await incrementHaircutCount(user.id);
+
+  // 🔑 Если скидка была применена, отмечаем порог как использованный
+  if (currentThreshold && discount > 0) {
+    const newUsedDiscounts = [...used, currentThreshold];
+    updatedUser = await updateUserDiscounts(user.id, newUsedDiscounts);
+  }
 
   const respUser = {
     id: updatedUser.id,
     name: updatedUser.name,
     email: updatedUser.email,
     haircutCount: updatedUser.haircutCount,
+    usedDiscounts: JSON.parse(updatedUser.usedDiscounts || "[]"),
+    isAdmin: updatedUser.isAdmin,
     createdAt: updatedUser.createdAt,
   };
 

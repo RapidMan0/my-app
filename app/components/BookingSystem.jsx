@@ -146,18 +146,29 @@ const BookingSidebar = () => {
       return;
     }
 
+    const visits = user.haircutCount || 0;
+    const usedDiscountsStr = typeof user.usedDiscounts === 'string' 
+      ? user.usedDiscounts 
+      : JSON.stringify(user.usedDiscounts || []);
+    const used = JSON.parse(usedDiscountsStr);
+
     let discountPercent = 0;
     let discountMessage = "";
+    let currentThreshold = null;
 
-    if (user.haircutCount >= 3 && user.haircutCount < 6) {
-      discountPercent = 10;
-      discountMessage = "🎉 10% discount for 3+ haircuts!";
-    } else if (user.haircutCount >= 6 && user.haircutCount < 10) {
-      discountPercent = 15;
-      discountMessage = "🎊 15% discount for 6+ haircuts!";
-    } else if (user.haircutCount >= 10) {
+    // Проверяем в обратном порядке (от 10 к 3)
+    if (visits >= 10 && !used.includes(10)) {
       discountPercent = 20;
-      discountMessage = "🏆 20% discount for 10+ haircuts!";
+      currentThreshold = 10;
+      discountMessage = "🏆 20% discount (one-time)";
+    } else if (visits >= 6 && !used.includes(6)) {
+      discountPercent = 15;
+      currentThreshold = 6;
+      discountMessage = "🎊 15% discount (one-time)";
+    } else if (visits >= 3 && !used.includes(3)) {
+      discountPercent = 10;
+      currentThreshold = 3;
+      discountMessage = "🎉 10% discount (one-time)";
     }
 
     const priceNum = parseFloat(selectedService.price.replace(/[^\d.]/g, ""));
@@ -217,9 +228,9 @@ const BookingSidebar = () => {
           showToast(`Booking confirmed! ${discount.message}`, "success");
           dispatch(resetBooking());
 
-          // Обновляем пользователя в контексте auth
+          // 🔑 Обновляем пользователя (включая usedDiscounts)
           if (updateUser && responseData.user) {
-            await updateUser(responseData.user); // передай обновленные данные
+            await updateUser(responseData.user);
           }
         } catch (err) {
           console.error("Save booking error:", err);
@@ -261,6 +272,11 @@ const BookingSidebar = () => {
 
   // Логика для подсказки о следующей скидке
   const visits = user?.haircutCount || 0;
+  const usedDiscountsStr = typeof user?.usedDiscounts === 'string' 
+    ? user.usedDiscounts 
+    : JSON.stringify(user?.usedDiscounts || []);
+  const used = JSON.parse(usedDiscountsStr);
+  
   let nextTarget = null;
   let nextDiscount = null;
 
