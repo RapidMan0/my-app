@@ -116,7 +116,7 @@ const BookingHistory = () => {
                   <div className="flex items-start justify-between md:justify-end">
                     <span
                       className={`px-4 py-2 rounded-full text-sm font-semibold ${getStatusColor(
-                        booking.status
+                        booking.status,
                       )}`}
                     >
                       {getStatusText(booking.status)}
