@@ -610,19 +610,22 @@ const AdminDashboard = () => {
             Дата формирования: {new Date().toLocaleDateString("ru-RU")}
           </Paragraph>
           <Divider />
-          <Table width="100%">
+          <Table width="100%" tableLayout="fixed">
             <TableHead>
               <TableRow style={{ background: "#2563eb" }}>
                 <TableCell
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    fontSize: 13,
+                    fontSize: 11,
                     textAlign: "center",
                     padding: "8px 4px",
                     borderRight: "1px solid #fff",
                     background: "#2563eb",
                     letterSpacing: "0.02em",
+                    width: "15%",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
                   }}
                 >
                   Client
@@ -631,12 +634,15 @@ const AdminDashboard = () => {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    fontSize: 13,
+                    fontSize: 11,
                     textAlign: "center",
                     padding: "8px 4px",
                     borderRight: "1px solid #fff",
                     background: "#2563eb",
                     letterSpacing: "0.02em",
+                    width: "18%",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
                   }}
                 >
                   Email
@@ -645,12 +651,15 @@ const AdminDashboard = () => {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    fontSize: 13,
+                    fontSize: 11,
                     textAlign: "center",
                     padding: "8px 4px",
                     borderRight: "1px solid #fff",
                     background: "#2563eb",
                     letterSpacing: "0.02em",
+                    width: "17%",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
                   }}
                 >
                   Service
@@ -659,12 +668,15 @@ const AdminDashboard = () => {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    fontSize: 13,
+                    fontSize: 11,
                     textAlign: "center",
                     padding: "8px 4px",
                     borderRight: "1px solid #fff",
                     background: "#2563eb",
                     letterSpacing: "0.02em",
+                    width: "16%",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
                   }}
                 >
                   Barber
@@ -673,12 +685,15 @@ const AdminDashboard = () => {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    fontSize: 13,
+                    fontSize: 11,
                     textAlign: "center",
                     padding: "8px 4px",
                     borderRight: "1px solid #fff",
                     background: "#2563eb",
                     letterSpacing: "0.02em",
+                    width: "18%",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
                   }}
                 >
                   Date & Time
@@ -687,18 +702,112 @@ const AdminDashboard = () => {
                   style={{
                     color: "#fff",
                     fontWeight: "bold",
-                    fontSize: 13,
+                    fontSize: 11,
                     textAlign: "center",
                     padding: "8px 4px",
                     background: "#2563eb",
                     letterSpacing: "0.02em",
+                    width: "16%",
+                    wordBreak: "break-word",
+                    whiteSpace: "normal",
                   }}
                 >
                   Status
                 </TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>{pdfTableRows}</TableBody>
+            <TableBody>
+              {getFilteredBookings().map((b, idx) => (
+                <TableRow
+                  key={b.id || idx}
+                  style={{
+                    background: idx % 2 === 0 ? "#f1f5f9" : "#fff",
+                    minHeight: "24px",
+                  }}
+                >
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      fontSize: 11,
+                      padding: "6px 4px",
+                      width: "15%",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {b.clientName ||
+                      b.name ||
+                      b.user?.name ||
+                      (b.email || "").split("@")[0] ||
+                      "Unknown"}
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      fontSize: 11,
+                      padding: "6px 4px",
+                      width: "18%",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {(b.email || b.user?.email || "—").length > 20
+                      ? (b.email || b.user?.email || "—").substring(0, 15) + "…"
+                      : b.email || b.user?.email || "—"}
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      fontSize: 11,
+                      padding: "6px 4px",
+                      width: "17%",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {b.service}
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      fontSize: 11,
+                      padding: "6px 4px",
+                      width: "16%",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {b.barber}
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      fontSize: 11,
+                      padding: "6px 4px",
+                      width: "18%",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {new Date(b.date).toLocaleDateString("en-GB")}
+                    <br />
+                    {b.time}
+                  </TableCell>
+                  <TableCell
+                    style={{
+                      textAlign: "center",
+                      fontSize: 11,
+                      padding: "6px 4px",
+                      width: "16%",
+                      wordBreak: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {getStatusText(b.status)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
         </PageRender>
 
