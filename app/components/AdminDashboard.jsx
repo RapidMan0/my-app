@@ -15,15 +15,13 @@ import {
   Divider,
   useSmartPrint,
 } from "react-smart-print";
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
+
+import StatisticsCards from "./AdminDashboard/StatisticsCards";
+import FilterButtons from "./AdminDashboard/FilterButtons";
+import BookingsTable from "./AdminDashboard/BookingsTable";
+import BookingDetailsModal from "./AdminDashboard/BookingDetailsModal";
+import RescheduleModal from "./AdminDashboard/RescheduleModal";
+import ServiceChart from "./AdminDashboard/ServiceChart";
 
 const AdminDashboard = () => {
   const { accessToken, user } = useAuth();
@@ -357,241 +355,22 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Bookings</p>
-                <p className="text-white text-3xl font-bold">{stats.total}</p>
-              </div>
-              <div className="text-4xl">📅</div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Confirmed</p>
-                <p className="text-green-400 text-3xl font-bold">
-                  {stats.confirmed}
-                </p>
-              </div>
-              <div className="text-4xl">✅</div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-gray-800 rounded-lg p-6 border border-gray-700"
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Cancelled</p>
-                <p className="text-red-400 text-3xl font-bold">
-                  {stats.cancelled}
-                </p>
-              </div>
-              <div className="text-4xl">❌</div>
-            </div>
-          </motion.div>
-        </div>
-
-        {/* Filter Buttons */}
-        <div className="flex gap-4 mb-8 flex-wrap">
-          <button
-            onClick={() => setFilter("all")}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              filter === "all"
-                ? "bg-blue-600 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setFilter("confirmed")}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              filter === "confirmed"
-                ? "bg-green-600 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-            }`}
-          >
-            Confirmed
-          </button>
-          <button
-            onClick={() => setFilter("cancelled")}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              filter === "cancelled"
-                ? "bg-red-600 text-white"
-                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-            }`}
-          >
-            Cancelled
-          </button>
-        </div>
+        <StatisticsCards stats={stats} />
+        <FilterButtons filter={filter} setFilter={setFilter} />
 
         {/* Bookings Table / Cards */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700"
+          className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-8"
         >
-          {getFilteredBookings().length === 0 ? (
-            <div className="p-8 text-center">
-              <p className="text-gray-400 text-lg">No bookings found</p>
-            </div>
-          ) : (
-            <>
-              {/* Desktop Table */}
-              <div className="hidden md:block">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-700 border-b border-gray-600">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-gray-300 font-semibold">
-                          Client
-                        </th>
-                        <th className="px-6 py-3 text-left text-gray-300 font-semibold">
-                          Service
-                        </th>
-                        <th className="px-6 py-3 text-left text-gray-300 font-semibold">
-                          Barber
-                        </th>
-                        <th className="px-6 py-3 text-left text-gray-300 font-semibold">
-                          Date & Time
-                        </th>
-                        <th className="px-6 py-3 text-left text-gray-300 font-semibold">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-gray-300 font-semibold">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getFilteredBookings().map((booking, index) => (
-                        <motion.tr
-                          key={booking.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="border-b border-gray-700 hover:bg-gray-750 transition-colors"
-                        >
-                          <td className="px-6 py-4 text-gray-300">
-                            <div>
-                              <p className="font-semibold">
-                                {booking.clientName ||
-                                  booking.name ||
-                                  booking.user?.name ||
-                                  (booking.email || "").split("@")[0] ||
-                                  "Unknown"}
-                              </p>
-                              <p className="text-sm text-gray-400">
-                                {booking.email || booking.user?.email || "—"}
-                              </p>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-gray-300">
-                            {booking.service}
-                          </td>
-                          <td className="px-6 py-4 text-gray-300">
-                            {booking.barber}
-                          </td>
-                          <td className="px-6 py-4 text-gray-300">
-                            {new Date(booking.date).toLocaleDateString("en-US")}{" "}
-                            {booking.time}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}
-                            >
-                              {getStatusText(booking.status)}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() => setSelectedBooking(booking)}
-                              className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-                            >
-                              Details
-                            </button>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              {/* Mobile Cards */}
-              <div className="md:hidden space-y-4 p-4">
-                {getFilteredBookings().map((booking, index) => (
-                  <motion.div
-                    key={booking.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-gray-700 rounded-lg p-4 border border-gray-600"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <div>
-                        <p className="font-semibold text-white">
-                          {booking.clientName ||
-                            booking.name ||
-                            booking.user?.name ||
-                            (booking.email || "").split("@")[0] ||
-                            "Unknown"}
-                        </p>
-                        <p className="text-sm text-gray-400">
-                          {booking.email || booking.user?.email || "—"}
-                        </p>
-                      </div>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}
-                      >
-                        {getStatusText(booking.status)}
-                      </span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-gray-400 text-sm">Service: </span>
-                      <span className="text-white">{booking.service}</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-gray-400 text-sm">Barber: </span>
-                      <span className="text-white">{booking.barber}</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-gray-400 text-sm">
-                        Date & Time:{" "}
-                      </span>
-                      <span className="text-white">
-                        {new Date(booking.date).toLocaleDateString("en-US")}{" "}
-                        {booking.time}
-                      </span>
-                    </div>
-                    <button
-                      onClick={() => setSelectedBooking(booking)}
-                      className="mt-2 text-blue-400 hover:text-blue-300 font-semibold transition-colors"
-                    >
-                      Details
-                    </button>
-                  </motion.div>
-                ))}
-              </div>
-            </>
-          )}
+          <BookingsTable
+            bookings={getFilteredBookings()}
+            onSelectBooking={setSelectedBooking}
+            getStatusColor={getStatusColor}
+            getStatusText={getStatusText}
+          />
         </motion.div>
 
         {/* PDF Report Button */}
@@ -833,195 +612,36 @@ const AdminDashboard = () => {
         </PageRender>
 
         {/* Booking Details Modal */}
-        {selectedBooking && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            onClick={() => setSelectedBooking(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              className="bg-gray-800 rounded-lg p-8 w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-2xl font-bold text-white mb-6">
-                Booking Details
-              </h2>
-
-              <div className="space-y-4 mb-6">
-                <div>
-                  <p className="text-gray-400 text-sm">Client</p>
-                  <p className="text-white font-semibold">
-                    {selectedBooking.clientName ||
-                      selectedBooking.name ||
-                      selectedBooking.user?.name ||
-                      (selectedBooking.email || "").split("@")[0] ||
-                      "Unknown"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Email</p>
-                  <p className="text-white">
-                    {selectedBooking.email ||
-                      selectedBooking.user?.email ||
-                      "—"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Phone</p>
-                  <p className="text-white">{selectedBooking.phone}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Service</p>
-                  <p className="text-white">{selectedBooking.service}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Barber</p>
-                  <p className="text-white">{selectedBooking.barber}</p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Date & Time</p>
-                  <p className="text-white">
-                    {new Date(selectedBooking.date).toLocaleDateString("en-US")}{" "}
-                    {selectedBooking.time}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-400 text-sm">Status</p>
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(
-                      selectedBooking.status,
-                    )}`}
-                  >
-                    {getStatusText(selectedBooking.status)}
-                  </span>
-                </div>
-                {selectedBooking.notes && (
-                  <div>
-                    <p className="text-gray-400 text-sm">Notes</p>
-                    <p className="text-white">{selectedBooking.notes}</p>
-                  </div>
-                )}
-              </div>
-
-              {selectedBooking.status === "confirmed" && (
-                <div className="flex gap-3 mb-4">
-                  <button
-                    onClick={() => handleRescheduleClick(selectedBooking)}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                  >
-                    Reschedule
-                  </button>
-                  <button
-                    onClick={() => handleCancelBooking(selectedBooking.id)}
-                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-
-              <button
-                onClick={() => setSelectedBooking(null)}
-                className="w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-              >
-                Close
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
+        <BookingDetailsModal
+          booking={selectedBooking}
+          onClose={() => setSelectedBooking(null)}
+          onReschedule={handleRescheduleClick}
+          onCancel={handleCancelBooking}
+          getStatusColor={getStatusColor}
+          getStatusText={getStatusText}
+        />
 
         {/* Reschedule Modal */}
-        {rescheduleModal.show && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-            onClick={() =>
-              setRescheduleModal({
-                show: false,
-                bookingId: null,
-                date: "",
-                time: "",
-              })
-            }
-          >
-            <motion.div
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              className="bg-gray-800 rounded-lg p-8 w-full max-w-md"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <h2 className="text-2xl font-bold text-white mb-6">
-                Reschedule Booking
-              </h2>
-
-              <div className="mb-4">
-                <label className="block text-gray-300 font-semibold mb-2">
-                  New Date
-                </label>
-                <input
-                  type="date"
-                  value={rescheduleModal.date}
-                  min={new Date().toISOString().split("T")[0]} // запретить прошлые даты
-                  onChange={(e) =>
-                    setRescheduleModal({
-                      ...rescheduleModal,
-                      date: e.target.value,
-                    })
-                  }
-                  className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none"
-                />
-                {rescheduleError && (
-                  <div className="text-red-400 mt-2 text-sm">
-                    {rescheduleError}
-                  </div>
-                )}
-              </div>
-
-              <div className="mb-6">
-                <label className="block text-gray-300 font-semibold mb-2">
-                  New Time
-                </label>
-                <input
-                  type="time"
-                  value={rescheduleModal.time}
-                  onChange={(e) =>
-                    setRescheduleModal({
-                      ...rescheduleModal,
-                      time: e.target.value,
-                    })
-                  }
-                  className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none"
-                />
-              </div>
-
-              <div className="flex gap-4">
-                <button
-                  onClick={() =>
-                    setRescheduleModal({
-                      show: false,
-                      bookingId: null,
-                      date: "",
-                      time: "",
-                    })
-                  }
-                  className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleRescheduleSubmit}
-                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                >
-                  Confirm
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+        <RescheduleModal
+          isOpen={rescheduleModal.show}
+          data={rescheduleModal}
+          error={rescheduleError}
+          onClose={() =>
+            setRescheduleModal({
+              show: false,
+              bookingId: null,
+              date: "",
+              time: "",
+            })
+          }
+          onDateChange={(date) =>
+            setRescheduleModal({ ...rescheduleModal, date })
+          }
+          onTimeChange={(time) =>
+            setRescheduleModal({ ...rescheduleModal, time })
+          }
+          onSubmit={handleRescheduleSubmit}
+        />
 
         {/* Toast Notification */}
         {toast.show && (
@@ -1038,26 +658,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Services usage chart */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-white mb-4">
-            Most Popular Services
-          </h2>
-          {serviceData.length === 0 ? (
-            <div className="text-gray-400">No data to display</div>
-          ) : (
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 overflow-hidden" style={{ position: "relative", maxWidth: "100%" }}>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={serviceData} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
-                  <CartesianGrid stroke="#2d3748" />
-                  <XAxis dataKey="service" tick={{ fill: "#cbd5e1", fontSize: 12 }} interval={0} angle={-30} textAnchor="end" height={60} />
-                  <YAxis allowDecimals={false} tick={{ fill: "#cbd5e1" }} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#60a5fa" radius={[4,4,0,0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </div>
+        <ServiceChart data={serviceData} />
       </div>
     </motion.div>
   );
