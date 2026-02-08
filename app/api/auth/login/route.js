@@ -50,6 +50,7 @@ export async function POST(req) {
     name: user.name,
     email: user.email,
     haircutCount: user.haircutCount,
+    usedDiscounts: JSON.parse(user.usedDiscounts || "[]"),
     isAdmin: user.isAdmin,
     createdAt: user.createdAt,
   };
