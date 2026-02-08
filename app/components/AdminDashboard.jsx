@@ -1045,7 +1045,7 @@ const AdminDashboard = () => {
           {serviceData.length === 0 ? (
             <div className="text-gray-400">No data to display</div>
           ) : (
-            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 overflow-hidden" style={{ position: "relative", maxWidth: "100%" }}>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={serviceData} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
                   <CartesianGrid stroke="#2d3748" />
