@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useAuth } from "./Auth/AuthProvider";
 import { motion } from "framer-motion";
 import {
@@ -15,6 +15,15 @@ import {
   Divider,
   useSmartPrint,
 } from "react-smart-print";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 
 const AdminDashboard = () => {
   const { accessToken, user } = useAuth();
@@ -213,6 +222,18 @@ const AdminDashboard = () => {
     confirmed: bookings.filter((b) => b.status === "confirmed").length,
     cancelled: bookings.filter((b) => b.status === "cancelled").length,
   };
+
+  // aggregated data for Recharts (most popular services)
+  const serviceData = useMemo(() => {
+    const counts = {};
+    bookings.forEach((b) => {
+      const key = (b.service || "Unknown").toString();
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([service, count]) => ({ service, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [bookings]);
 
   // PDF header/footer
   const pdfHeader = (page, total) => (
@@ -1015,6 +1036,28 @@ const AdminDashboard = () => {
             {toast.message}
           </motion.div>
         )}
+
+        {/* Services usage chart */}
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-white mb-4">
+            Most Popular Services
+          </h2>
+          {serviceData.length === 0 ? (
+            <div className="text-gray-400">No data to display</div>
+          ) : (
+            <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={serviceData} margin={{ top: 10, right: 20, left: 0, bottom: 30 }}>
+                  <CartesianGrid stroke="#2d3748" />
+                  <XAxis dataKey="service" tick={{ fill: "#cbd5e1", fontSize: 12 }} interval={0} angle={-30} textAnchor="end" height={60} />
+                  <YAxis allowDecimals={false} tick={{ fill: "#cbd5e1" }} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#60a5fa" radius={[4,4,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
