@@ -15,6 +15,7 @@ import {
   Divider,
   useSmartPrint,
 } from "react-smart-print";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/20/solid";
 
 import StatisticsCards from "./AdminDashboard/StatisticsCards";
 import FilterButtons from "./AdminDashboard/FilterButtons";
@@ -29,6 +30,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [toast, setToast] = useState({
     show: false,
     message: "",
@@ -188,6 +191,17 @@ const AdminDashboard = () => {
     if (filter === "all") return bookings;
     return bookings.filter((b) => b.status === filter);
   };
+
+  const filteredBookings = getFilteredBookings();
+  const totalPages = Math.ceil(filteredBookings.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedBookings = filteredBookings.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -366,11 +380,108 @@ const AdminDashboard = () => {
           className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 mb-8"
         >
           <BookingsTable
-            bookings={getFilteredBookings()}
+            bookings={paginatedBookings}
             onSelectBooking={setSelectedBooking}
             getStatusColor={getStatusColor}
             getStatusText={getStatusText}
           />
+
+          {/* Pagination Controls */}
+          <div className="flex items-center justify-between border-t border-gray-700 px-4 py-3 sm:px-6">
+            <div className="flex flex-1 justify-between sm:hidden">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className="relative inline-flex items-center rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+            <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm text-gray-300">
+                  Showing <span className="font-medium">{startIndex + 1}</span> to{" "}
+                  <span className="font-medium">{Math.min(endIndex, filteredBookings.length)}</span> of{" "}
+                  <span className="font-medium">{filteredBookings.length}</span> results
+                </p>
+              </div>
+              <div>
+                <nav
+                  aria-label="Pagination"
+                  className="isolate inline-flex -space-x-px rounded-md border border-gray-600"
+                >
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-gray-600 hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeftIcon aria-hidden="true" className="size-5" />
+                  </button>
+
+                  {/* Page numbers */}
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                    // Show first 3 pages, last 3 pages, and current page with neighbors
+                    const isVisible =
+                      pageNum <= 3 ||
+                      pageNum > totalPages - 3 ||
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
+
+                    if (!isVisible && pageNum !== 4 && pageNum !== totalPages - 2) {
+                      return null;
+                    }
+
+                    if (
+                      (pageNum === 4 && totalPages > 6 && currentPage > 4) ||
+                      (pageNum === totalPages - 2 && totalPages > 6 && currentPage < totalPages - 3)
+                    ) {
+                      return (
+                        <span
+                          key={pageNum}
+                          className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-400 ring-1 ring-gray-600 focus:outline-offset-0"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+
+                    if (!isVisible) return null;
+
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        aria-current={pageNum === currentPage ? "page" : undefined}
+                        className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline-offset-2 ${
+                          pageNum === currentPage
+                            ? "z-10 bg-indigo-600 text-white focus-visible:outline-2 focus-visible:outline-indigo-500"
+                            : "text-gray-200 ring-1 ring-gray-600 hover:bg-gray-700 focus-visible:outline-offset-0"
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-600 hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRightIcon aria-hidden="true" className="size-5" />
+                  </button>
+                </nav>
+              </div>
+            </div>
+          </div>
         </motion.div>
 
         {/* PDF Report Button */}

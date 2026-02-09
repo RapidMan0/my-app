@@ -122,12 +122,12 @@ const BookingSidebar = () => {
   // Handle scroll event to prevent background scrolling
   useEffect(() => {
     if (isOpen) {
-      document.body.classList.add("overflow-hidden");
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.classList.remove("overflow-hidden");
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.classList.remove("overflow-hidden");
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
