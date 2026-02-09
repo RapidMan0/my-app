@@ -17,7 +17,7 @@ import {
 } from "react-smart-print";
 
 const BookingHistory = () => {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -142,8 +142,8 @@ const BookingHistory = () => {
       }}
     >
       <Typography fontSize={10}>
-        Generated: {new Date().toLocaleDateString()} | Total bookings:{" "}
-        {bookings.length}
+        Generated: {new Date().toLocaleDateString()} | Total visits:{" "}
+        {user?.haircutCount || 0} | Bookings in history: {bookings.length}
       </Typography>
     </div>
   );
