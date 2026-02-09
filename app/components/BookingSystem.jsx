@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import emailjs from "@emailjs/browser";
+import { CheckCircleIcon, XCircleIcon, TrophyIcon, SparklesIcon, LightBulbIcon } from "@heroicons/react/24/solid";
 import { useAuth } from "./Auth/AuthProvider";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -33,10 +34,14 @@ const Toast = ({ message, show, onClose, type = "success" }) => (
     role="alert"
   >
     <div className="flex items-center gap-3">
-      <span className="text-2xl">{type === "success" ? "✅" : "❌"}</span>
+      {type === "success" ? (
+        <CheckCircleIcon className="w-6 h-6 flex-shrink-0" />
+      ) : (
+        <XCircleIcon className="w-6 h-6 flex-shrink-0" />
+      )}
       <span className="font-semibold">{message}</span>
       <button
-        className="ml-4 text-white text-xl hover:text-gray-200"
+        className="ml-4 text-white hover:text-gray-200"
         onClick={onClose}
         aria-label="Close"
       >
@@ -161,15 +166,15 @@ const BookingSidebar = () => {
     if (visits >= 10 && !used.includes(10)) {
       discountPercent = 20;
       currentThreshold = 10;
-      discountMessage = "🏆 20% discount (one-time)";
+      discountMessage = "20% discount (one-time)";
     } else if (visits >= 6 && !used.includes(6)) {
       discountPercent = 15;
       currentThreshold = 6;
-      discountMessage = "🎊 15% discount (one-time)";
+      discountMessage = "15% discount (one-time)";
     } else if (visits >= 3 && !used.includes(3)) {
       discountPercent = 10;
       currentThreshold = 3;
-      discountMessage = "🎉 10% discount (one-time)";
+      discountMessage = "10% discount (one-time)";
     }
 
     const priceNum = parseFloat(selectedService.price.replace(/[^\d.]/g, ""));
@@ -510,15 +515,19 @@ const BookingSidebar = () => {
                       -{Math.round(discount.amount)} mdl
                     </span>
                   </div>
-                  <p className="text-sm text-green-700 mt-2 font-semibold">
+                  <div className="text-sm text-green-700 mt-2 font-semibold flex items-center gap-2">
+                    {discount.percent === 20 && <TrophyIcon className="w-5 h-5" />}
+                    {discount.percent === 15 && <SparklesIcon className="w-5 h-5" />}
+                    {discount.percent === 10 && <SparklesIcon className="w-5 h-5" />}
                     {discount.message}
-                  </p>
+                  </div>
                 </>
               ) : (
                 nextTarget && (
                   <div className="bg-blue-100 p-3 rounded-lg mt-3 mb-3">
-                    <p className="text-sm text-blue-800 font-medium">
-                      💡 Visit {nextTarget - visits} more time
+                    <p className="text-sm text-blue-800 font-medium flex items-center gap-2">
+                      <LightBulbIcon className="w-5 h-5" />
+                      Visit {nextTarget - visits} more time
                       {nextTarget - visits !== 1 ? "s" : ""} to unlock{" "}
                       {nextDiscount}% discount!
                     </p>
