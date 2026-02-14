@@ -397,7 +397,9 @@ const AdminDashboard = () => {
                 Previous
               </button>
               <button
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="relative ml-3 inline-flex items-center rounded-md border border-gray-600 bg-gray-700 px-4 py-2 text-sm font-medium text-gray-200 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -407,9 +409,14 @@ const AdminDashboard = () => {
             <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm text-gray-300">
-                  Showing <span className="font-medium">{startIndex + 1}</span> to{" "}
-                  <span className="font-medium">{Math.min(endIndex, filteredBookings.length)}</span> of{" "}
-                  <span className="font-medium">{filteredBookings.length}</span> results
+                  Showing <span className="font-medium">{startIndex + 1}</span>{" "}
+                  to{" "}
+                  <span className="font-medium">
+                    {Math.min(endIndex, filteredBookings.length)}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-medium">{filteredBookings.length}</span>{" "}
+                  results
                 </p>
               </div>
               <div>
@@ -427,51 +434,64 @@ const AdminDashboard = () => {
                   </button>
 
                   {/* Page numbers */}
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
-                    // Show first 3 pages, last 3 pages, and current page with neighbors
-                    const isVisible =
-                      pageNum <= 3 ||
-                      pageNum > totalPages - 3 ||
-                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (pageNum) => {
+                      // Show first 3 pages, last 3 pages, and current page with neighbors
+                      const isVisible =
+                        pageNum <= 3 ||
+                        pageNum > totalPages - 3 ||
+                        (pageNum >= currentPage - 1 &&
+                          pageNum <= currentPage + 1);
 
-                    if (!isVisible && pageNum !== 4 && pageNum !== totalPages - 2) {
-                      return null;
-                    }
+                      if (
+                        !isVisible &&
+                        pageNum !== 4 &&
+                        pageNum !== totalPages - 2
+                      ) {
+                        return null;
+                      }
 
-                    if (
-                      (pageNum === 4 && totalPages > 6 && currentPage > 4) ||
-                      (pageNum === totalPages - 2 && totalPages > 6 && currentPage < totalPages - 3)
-                    ) {
+                      if (
+                        (pageNum === 4 && totalPages > 6 && currentPage > 4) ||
+                        (pageNum === totalPages - 2 &&
+                          totalPages > 6 &&
+                          currentPage < totalPages - 3)
+                      ) {
+                        return (
+                          <span
+                            key={pageNum}
+                            className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-400 ring-1 ring-gray-600 focus:outline-offset-0"
+                          >
+                            ...
+                          </span>
+                        );
+                      }
+
+                      if (!isVisible) return null;
+
                       return (
-                        <span
+                        <button
                           key={pageNum}
-                          className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-400 ring-1 ring-gray-600 focus:outline-offset-0"
+                          onClick={() => setCurrentPage(pageNum)}
+                          aria-current={
+                            pageNum === currentPage ? "page" : undefined
+                          }
+                          className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline-offset-2 ${
+                            pageNum === currentPage
+                              ? "z-10 bg-indigo-600 text-white focus-visible:outline-2 focus-visible:outline-indigo-500"
+                              : "text-gray-200 ring-1 ring-gray-600 hover:bg-gray-700 focus-visible:outline-offset-0"
+                          }`}
                         >
-                          ...
-                        </span>
+                          {pageNum}
+                        </button>
                       );
-                    }
-
-                    if (!isVisible) return null;
-
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setCurrentPage(pageNum)}
-                        aria-current={pageNum === currentPage ? "page" : undefined}
-                        className={`relative inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20 focus-visible:outline-offset-2 ${
-                          pageNum === currentPage
-                            ? "z-10 bg-indigo-600 text-white focus-visible:outline-2 focus-visible:outline-indigo-500"
-                            : "text-gray-200 ring-1 ring-gray-600 hover:bg-gray-700 focus-visible:outline-offset-0"
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+                    },
+                  )}
 
                   <button
-                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(p + 1, totalPages))
+                    }
                     disabled={currentPage === totalPages}
                     className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-gray-600 hover:bg-gray-700 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
