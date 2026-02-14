@@ -127,7 +127,7 @@ body {
 }
 .accessibility-sub {
   font-size: 12px;
-  color: #499BED;
+  color: #499bed;
   line-height: 1.2;
   margin-top: 2px;
 }
@@ -184,4 +184,29 @@ html.inverted body {
 .accessibility-option input {
   width: 16px;
   height: 16px;
+}
+/* Highlight Links Mode */
+.highlight-links a,
+.highlight-links [role="link"],
+.highlight-links button,
+.highlight-links [role="button"],
+.highlight-links input[type="button"],
+.highlight-links input[type="submit"],
+.highlight-links input[type="reset"],
+.highlight-links [onclick] {
+  outline: 3px solid #ff6b35 !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 8px rgba(255, 107, 53, 0.6) !important;
+}
+
+.highlight-links a:hover,
+.highlight-links [role="link"]:hover,
+.highlight-links button:hover,
+.highlight-links [role="button"]:hover,
+.highlight-links input[type="button"]:hover,
+.highlight-links input[type="submit"]:hover,
+.highlight-links input[type="reset"]:hover,
+.highlight-links [onclick]:hover {
+  outline-width: 4px !important;
+  box-shadow: 0 0 12px rgba(255, 107, 53, 0.8) !important;
 }

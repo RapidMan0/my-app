@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 
@@ -6,6 +6,7 @@ export default function AccessibilityButton() {
   const [open, setOpen] = useState(false);
   const [enabled, setEnabled] = useState(false);
   const [inverted, setInverted] = useState(false);
+  const [highlightLinks, setHighlightLinks] = useState(false);
   const rootRef = useRef(null);
 
   useEffect(() => {
@@ -19,6 +20,11 @@ export default function AccessibilityButton() {
       if (inv === "true") {
         setInverted(true);
         document.documentElement.classList.add("inverted");
+      }
+      const highlight = localStorage.getItem("highlightLinksEnabled");
+      if (highlight === "true") {
+        setHighlightLinks(true);
+        document.documentElement.classList.add("highlight-links");
       }
     } catch (e) {
       // ignore
@@ -45,6 +51,16 @@ export default function AccessibilityButton() {
     }
   }, [inverted]);
 
+  useEffect(() => {
+    if (highlightLinks) {
+      document.documentElement.classList.add("highlight-links");
+      localStorage.setItem("highlightLinksEnabled", "true");
+    } else {
+      document.documentElement.classList.remove("highlight-links");
+      localStorage.setItem("highlightLinksEnabled", "false");
+    }
+  }, [highlightLinks]);
+
   // Close menu when clicking outside
   useEffect(() => {
     function onDoc(e) {
@@ -63,13 +79,26 @@ export default function AccessibilityButton() {
         onClick={() => setOpen((v) => !v)}
         title="Доступность"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2a2 2 0 100 4 2 2 0 000-4zM6 8a6 6 0 1112 0v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8z" fill="currentColor" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 2a2 2 0 100 4 2 2 0 000-4zM6 8a6 6 0 1112 0v8a2 2 0 01-2 2H8a2 2 0 01-2-2V8z"
+            fill="currentColor"
+          />
         </svg>
       </button>
 
       {open && (
-        <div className="accessibility-menu animate-fade-in" role="dialog" aria-label="Accessibility options">
+        <div
+          className="accessibility-menu animate-fade-in"
+          role="dialog"
+          aria-label="Accessibility options"
+        >
           <div className="accessibility-menu-header">Доступность</div>
 
           <button
@@ -80,7 +109,9 @@ export default function AccessibilityButton() {
           >
             <div className="accessibility-texts">
               <div className="accessibility-title">Шрифт для дислексиков</div>
-              <div className="accessibility-sub">Улучшает читаемость текста для людей с дислексией</div>
+              <div className="accessibility-sub">
+                Улучшает читаемость текста для людей с дислексией
+              </div>
             </div>
           </button>
 
@@ -92,7 +123,23 @@ export default function AccessibilityButton() {
           >
             <div className="accessibility-texts">
               <div className="accessibility-title">Инвертировать цвета</div>
-              <div className="accessibility-sub">Инвертирует цвета сайта для контрастности</div>
+              <div className="accessibility-sub">
+                Инвертирует цвета сайта для контрастности
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className={`accessibility-card ${highlightLinks ? "active" : ""}`}
+            onClick={() => setHighlightLinks((v) => !v)}
+            aria-pressed={highlightLinks}
+          >
+            <div className="accessibility-texts">
+              <div className="accessibility-title">Выделить ссылки</div>
+              <div className="accessibility-sub">
+                Выделяет все ссылки и кнопки ярким контуром
+              </div>
             </div>
           </button>
         </div>
