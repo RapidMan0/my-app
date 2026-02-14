@@ -5,7 +5,13 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import emailjs from "@emailjs/browser";
-import { CheckCircleIcon, XCircleIcon, TrophyIcon, SparklesIcon, LightBulbIcon } from "@heroicons/react/24/solid";
+import {
+  CheckCircleIcon,
+  XCircleIcon,
+  TrophyIcon,
+  SparklesIcon,
+  LightBulbIcon,
+} from "@heroicons/react/24/solid";
 import { useAuth } from "./Auth/AuthProvider";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -153,9 +159,10 @@ const BookingSidebar = () => {
     }
 
     const visits = user.haircutCount || 0;
-    const usedDiscountsStr = typeof user.usedDiscounts === 'string' 
-      ? user.usedDiscounts 
-      : JSON.stringify(user.usedDiscounts || []);
+    const usedDiscountsStr =
+      typeof user.usedDiscounts === "string"
+        ? user.usedDiscounts
+        : JSON.stringify(user.usedDiscounts || []);
     const used = JSON.parse(usedDiscountsStr);
 
     let discountPercent = 0;
@@ -196,7 +203,7 @@ const BookingSidebar = () => {
     dispatch(setShowForm(false));
     dispatch(setIsOpen(false));
     dispatch(setShowBookingButton(true));
-    
+
     // Очищаем форму после submit
     reset();
 
@@ -281,11 +288,12 @@ const BookingSidebar = () => {
 
   // Логика для подсказки о следующей скидке
   const visits = user?.haircutCount || 0;
-  const usedDiscountsStr = typeof user?.usedDiscounts === 'string' 
-    ? user.usedDiscounts 
-    : JSON.stringify(user?.usedDiscounts || []);
+  const usedDiscountsStr =
+    typeof user?.usedDiscounts === "string"
+      ? user.usedDiscounts
+      : JSON.stringify(user?.usedDiscounts || []);
   const used = JSON.parse(usedDiscountsStr);
-  
+
   let nextTarget = null;
   let nextDiscount = null;
 
@@ -516,9 +524,15 @@ const BookingSidebar = () => {
                     </span>
                   </div>
                   <div className="text-sm text-green-700 mt-2 font-semibold flex items-center gap-2">
-                    {discount.percent === 20 && <TrophyIcon className="w-5 h-5" />}
-                    {discount.percent === 15 && <SparklesIcon className="w-5 h-5" />}
-                    {discount.percent === 10 && <SparklesIcon className="w-5 h-5" />}
+                    {discount.percent === 20 && (
+                      <TrophyIcon className="w-5 h-5" />
+                    )}
+                    {discount.percent === 15 && (
+                      <SparklesIcon className="w-5 h-5" />
+                    )}
+                    {discount.percent === 10 && (
+                      <SparklesIcon className="w-5 h-5" />
+                    )}
                     {discount.message}
                   </div>
                 </>
