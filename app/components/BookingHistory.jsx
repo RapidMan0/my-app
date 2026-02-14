@@ -172,14 +172,14 @@ const BookingHistory = () => {
               disabled={pdfLoading}
               className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold transition-colors"
             >
-              {pdfLoading ? "Генерация PDF..." : "Скачать историю (PDF)"}
+              {pdfLoading ? "Generating PDF..." : "Download the history (PDF)"}
             </button>
             {pdfRendered && (
               <button
                 onClick={closePdf}
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition-colors"
               >
-                Закрыть PDF
+                Close PDF
               </button>
             )}
           </div>
