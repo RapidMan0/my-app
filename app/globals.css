@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 :root {
   --background: rgb(75, 73, 73);
   --foreground: #171717;
@@ -19,14 +18,161 @@ html {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px);}
-    to { opacity: 1; transform: translateY(0);}
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .animate-fade-in {
-    animation: fadeIn 0.5s;
+  animation: fadeIn 0.5s;
 }
 
 body {
   background-color: rgb(75, 73, 73);
 }
 
+/* Accessibility: dyslexic-friendly font and floating button styles */
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/fonts/OpenDyslexic-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "OpenDyslexic";
+  src: url("/fonts/OpenDyslexic-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: bold;
+  font-display: swap;
+}
+
+.dyslexic-font {
+  font-family:
+    "OpenDyslexic",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif !important;
+  letter-spacing: 0.01em;
+  line-height: 1.55 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.accessibility-root {
+  position: fixed;
+  z-index: 9999;
+  left: 16px;
+  bottom: 80px;
+}
+.accessibility-button {
+  background: #111827;
+  color: #ffffff;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+.accessibility-button:hover {
+  transform: translateY(-2px);
+}
+.accessibility-menu {
+  margin-bottom: 8px;
+  background: white;
+  color: #111827;
+  padding: 8px 10px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+  /* Ensure menu doesn't overflow the left edge */
+  transform-origin: left bottom;
+}
+.accessibility-menu-header {
+  font-size: 14px;
+  font-weight: 700;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 8px;
+}
+.accessibility-texts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.accessibility-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.accessibility-sub {
+  font-size: 12px;
+  color: #499BED;
+}
+
+/* Card-style controls */
+.accessibility-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition:
+    background 0.12s ease,
+    transform 0.08s ease,
+    border-color 0.12s ease;
+}
+.accessibility-card:hover {
+  transform: translateY(-2px);
+}
+.accessibility-card.active {
+  background: #111827;
+  color: #fff;
+  border-color: transparent;
+}
+.accessibility-card + .accessibility-card {
+  margin-top: 8px;
+}
+
+.accessibility-menu {
+  min-width: 220px;
+}
+
+/* Inverted colors mode: invert whole page but re-invert media so images stay natural */
+html.inverted {
+  transition: filter 0.18s ease;
+  filter: invert(1) hue-rotate(180deg);
+}
+/* By default images and media are now affected by the page-level inversion
+   (removed explicit re-inversion so images will invert with the page). */
+
+/* Slightly increase contrast for inverted mode for readability */
+html.inverted body {
+  background-color: #111 !important;
+}
+.accessibility-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+}
+.accessibility-option input {
+  width: 16px;
+  height: 16px;
+}

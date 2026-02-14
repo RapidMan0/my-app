@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Roboto, Playfair_Display } from "next/font/google";
 import { Providers } from "./providers";
+import AccessibilityButton from "./components/Accessibility/AccessibilityButton";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 const playfair = Playfair_Display({ subsets: ["latin"], weight: "700", variable: "--font-playfair" });
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
       <body>
         <Providers>
           {children}
+          <AccessibilityButton />
         </Providers>
       </body>
     </html>
