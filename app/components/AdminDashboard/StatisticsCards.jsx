@@ -26,12 +26,12 @@ const StatisticsCards = ({ stats }) => {
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-sm">Confirmed</p>
-            <p className="text-green-400 text-3xl font-bold">
-              {stats.confirmed}
+            <p className="text-gray-400 text-sm">Today</p>
+            <p className="text-yellow-400 text-3xl font-bold">
+              {stats.today}
             </p>
           </div>
-          <div className="text-4xl">✅</div>
+          <div className="text-4xl">📆</div>
         </div>
       </motion.div>
 
@@ -43,12 +43,12 @@ const StatisticsCards = ({ stats }) => {
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-gray-400 text-sm">Cancelled</p>
-            <p className="text-red-400 text-3xl font-bold">
-              {stats.cancelled}
+            <p className="text-gray-400 text-sm">Upcoming</p>
+            <p className="text-green-400 text-3xl font-bold">
+              {stats.upcoming}
             </p>
           </div>
-          <div className="text-4xl">❌</div>
+          <div className="text-4xl">⏳</div>
         </div>
       </motion.div>
     </div>

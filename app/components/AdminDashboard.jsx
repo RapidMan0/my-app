@@ -187,9 +187,34 @@ const AdminDashboard = () => {
     }
   };
 
+  // Helper functions for date filtering
+  const normalizeDate = (dateStr) => {
+    // Returns yyyy-mm-dd string
+    const d = new Date(dateStr);
+    return d.toISOString().slice(0, 10);
+  };
+
+  const isToday = (dateStr) => {
+    const today = new Date();
+    return normalizeDate(dateStr) === normalizeDate(today);
+  };
+
+  const isUpcoming = (dateStr) => {
+    const today = new Date();
+    return normalizeDate(dateStr) > normalizeDate(today);
+  };
+
+  const isPast = (dateStr) => {
+    const today = new Date();
+    return normalizeDate(dateStr) < normalizeDate(today);
+  };
+
   const getFilteredBookings = () => {
     if (filter === "all") return bookings;
-    return bookings.filter((b) => b.status === filter);
+    if (filter === "today") return bookings.filter((b) => isToday(b.date));
+    if (filter === "upcoming") return bookings.filter((b) => isUpcoming(b.date));
+    if (filter === "past") return bookings.filter((b) => isPast(b.date));
+    return bookings;
   };
 
   const filteredBookings = getFilteredBookings();
@@ -229,10 +254,12 @@ const AdminDashboard = () => {
     }
   };
 
+  // Statistics based on date
   const stats = {
     total: bookings.length,
-    confirmed: bookings.filter((b) => b.status === "confirmed").length,
-    cancelled: bookings.filter((b) => b.status === "cancelled").length,
+    today: bookings.filter((b) => isToday(b.date)).length,
+    upcoming: bookings.filter((b) => isUpcoming(b.date)).length,
+    past: bookings.filter((b) => isPast(b.date)).length,
   };
 
   // aggregated data for Recharts (most popular services)

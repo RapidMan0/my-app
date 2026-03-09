@@ -14,24 +14,34 @@ const FilterButtons = ({ filter, setFilter }) => {
         All
       </button>
       <button
-        onClick={() => setFilter("confirmed")}
+        onClick={() => setFilter("today")}
         className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-          filter === "confirmed"
+          filter === "today"
+            ? "bg-yellow-600 text-white"
+            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+        }`}
+      >
+        Today
+      </button>
+      <button
+        onClick={() => setFilter("upcoming")}
+        className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+          filter === "upcoming"
             ? "bg-green-600 text-white"
             : "bg-gray-700 text-gray-300 hover:bg-gray-600"
         }`}
       >
-        Confirmed
+        Upcoming
       </button>
       <button
-        onClick={() => setFilter("cancelled")}
+        onClick={() => setFilter("past")}
         className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-          filter === "cancelled"
+          filter === "past"
             ? "bg-red-600 text-white"
             : "bg-gray-700 text-gray-300 hover:bg-gray-600"
         }`}
       >
-        Cancelled
+        Past
       </button>
     </div>
   );
