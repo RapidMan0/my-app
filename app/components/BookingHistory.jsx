@@ -221,7 +221,7 @@ const BookingHistory = () => {
 
                 <div className="grid gap-3">
                   {group.items
-                    .sort((a, b) => new Date(a.date) - new Date(b.date))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .map((booking) => (
                       <div
                         key={booking.id}
@@ -331,7 +331,7 @@ const BookingHistory = () => {
                 </TableHead>
                 <TableBody>
                   {group.items
-                    .sort((a, b) => new Date(a.date) - new Date(b.date))
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .map((b, idx) => (
                       <TableRow
                         key={b.id || idx}
