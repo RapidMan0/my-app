@@ -73,7 +73,7 @@ const BookingsTable = ({
                     {booking.barber}
                   </td>
                   <td className="px-6 py-4 text-gray-300">
-                    {new Date(booking.date).toLocaleDateString("en-US")}{" "}
+                    {new Date(booking.date).toLocaleDateString("en-GB")}{" "}
                     {booking.time}
                   </td>
                   <td className="px-6 py-4">
@@ -138,7 +138,7 @@ const BookingsTable = ({
             <div className="mb-2">
               <span className="text-gray-400 text-sm">Date & Time: </span>
               <span className="text-white">
-                {new Date(booking.date).toLocaleDateString("en-US")}{" "}
+                {new Date(booking.date).toLocaleDateString("en-GB")}{" "}
                 {booking.time}
               </span>
             </div>

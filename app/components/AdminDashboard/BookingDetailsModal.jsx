@@ -60,7 +60,7 @@ const BookingDetailsModal = ({
           <div>
             <p className="text-gray-400 text-sm">Date & Time</p>
             <p className="text-white">
-              {new Date(booking.date).toLocaleDateString("en-US")}{" "}
+                {new Date(booking.date).toLocaleDateString("en-GB")}{" "}
               {booking.time}
             </p>
           </div>

@@ -232,7 +232,7 @@ const BookingHistory = () => {
                             {booking.service} — {booking.barber}
                           </div>
                           <div className="text-sm text-gray-400">
-                            {new Date(booking.date).toLocaleDateString("en-US")}{" "}
+                            {new Date(booking.date).toLocaleDateString("en-GB")}{" "}
                             at {booking.time}
                           </div>
                         </div>
