@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import emailjs from "@emailjs/browser";
+import md5 from "blueimp-md5";
 import {
   CheckCircleIcon,
   XCircleIcon,
@@ -75,6 +76,14 @@ const BookingSidebar = () => {
     toast,
   } = useSelector((state) => state.booking);
 
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
+  const [selectedBarberForReviews, setSelectedBarberForReviews] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
+  const [selectedReviews, setSelectedReviews] = useState([]);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [isDeletingReviews, setIsDeletingReviews] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -86,6 +95,102 @@ const BookingSidebar = () => {
   useEffect(() => {
     emailjs.init("TWMGobjrMR-dkenWF"); // ваш Public Key
   }, []);
+
+  const openReviewsModal = async (barber) => {
+    setSelectedBarberForReviews(barber);
+    setSelectedReviews([]); // Сбрасываем выбранные отзывы
+    try {
+      const response = await fetch(`/api/reviews?barberId=${barber.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data.reviews || []);
+      } else {
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+    setShowReviewsModal(true);
+  };
+
+  const submitReview = async () => {
+    if (!newReview.rating || !accessToken) return;
+
+    setIsSubmittingReview(true);
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          barberId: selectedBarberForReviews.id,
+          rating: newReview.rating,
+          comment: newReview.comment,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data.reviews); // Используем обновленные отзывы с userName
+        setNewReview({ rating: 5, comment: "" });
+        // Обновляем барберов в store
+        const updatedBarbers = barbers.map(b =>
+          b.id === selectedBarberForReviews.id
+            ? { ...b, averageRating: data.averageRating, reviews: data.reviews }
+            : b
+        );
+        dispatch(setBarbers(updatedBarbers));
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    }
+    setIsSubmittingReview(false);
+  };
+
+  const deleteSelectedReviews = async () => {
+    if (selectedReviews.length === 0 || !accessToken) return;
+
+    setIsDeletingReviews(true);
+    try {
+      const response = await fetch("/api/reviews", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          barberId: selectedBarberForReviews.id,
+          reviewIds: selectedReviews,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data.reviews);
+        setSelectedReviews([]);
+        // Обновляем барберов в store
+        const updatedBarbers = barbers.map(b =>
+          b.id === selectedBarberForReviews.id
+            ? { ...b, averageRating: data.averageRating, reviews: data.reviews }
+            : b
+        );
+        dispatch(setBarbers(updatedBarbers));
+      }
+    } catch (error) {
+      console.error("Error deleting reviews:", error);
+    }
+    setIsDeletingReviews(false);
+  };
+
+  const handleReviewSelect = (reviewId) => {
+    setSelectedReviews(prev =>
+      prev.includes(reviewId)
+        ? prev.filter(id => id !== reviewId)
+        : [...prev, reviewId]
+    );
+  };
 
   // Fetch barbers and services data
   useEffect(() => {
@@ -347,7 +452,7 @@ const BookingSidebar = () => {
                 dispatch(setShowForm(false));
               }
             }}
-            className="text-2xl"
+            className="text-3xl hover:bg-gray-100 rounded-md px-2 py-1 transition-colors duration-200"
           >
             {selectedBarber ? "← Back" : "×"}
           </button>
@@ -378,12 +483,24 @@ const BookingSidebar = () => {
               <div>
                 <p className="font-semibold text-lg">{barber.name}</p>
                 <p className="text-sm text-gray-500">{barber.role}</p>
-                <p className="text-yellow-500 text-sm">
-                  ★★★★★{" "}
-                  <span className="text-gray-500">
-                    {barber.feedback} feedbacks
-                  </span>
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-yellow-500 text-sm">
+                    {"★".repeat(Math.floor(barber.averageRating || 0))}
+                    {"☆".repeat(5 - Math.floor(barber.averageRating || 0))}{" "}
+                    <span className="text-gray-500">
+                      {barber.averageRating || 0} ({(barber.reviews || []).length} reviews)
+                    </span>
+                  </p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openReviewsModal(barber);
+                    }}
+                    className="text-xs text-blue-500 hover:text-blue-700 underline"
+                  >
+                    View Reviews
+                  </button>
+                </div>
                 {barber.experience && (
                   <p className="text-xs text-gray-400">
                     Experience: {barber.experience}
@@ -605,6 +722,143 @@ const BookingSidebar = () => {
           </form>
         )}
       </motion.aside>
+      
+      {/* Reviews Modal */}
+      {showReviewsModal && selectedBarberForReviews && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold">
+                Reviews for {selectedBarberForReviews.name}
+              </h3>
+              <button
+                onClick={() => setShowReviewsModal(false)}
+                className="text-gray-500 hover:text-gray-700 hover:bg-gray-100 text-3xl rounded-md px-2 py-1 transition-colors duration-200"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Existing Reviews */}
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-semibold">Customer Reviews ({reviews.length})</h4>
+                {user?.isAdmin && selectedReviews.length > 0 && (
+                  <button
+                    onClick={deleteSelectedReviews}
+                    disabled={isDeletingReviews}
+                    className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {isDeletingReviews ? "Deleting..." : `Delete (${selectedReviews.length})`}
+                  </button>
+                )}
+              </div>
+              {reviews.length === 0 ? (
+                <p className="text-gray-500">No reviews yet.</p>
+              ) : (
+                reviews.map((review, index) => (
+                  <div key={review.id} className={`flex gap-3 ${index < reviews.length - 1 ? 'border-b border-gray-200 pb-3 mb-3' : 'pb-3'}`}>
+                    {user?.isAdmin && (
+                      <div className="flex-shrink-0 pt-1">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedReviews.includes(review.id)}
+                            onChange={() => handleReviewSelect(review.id)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-5 h-5 bg-gray-200 border-2 border-gray-300 rounded peer-checked:bg-red-500 peer-checked:border-red-500 peer-hover:bg-gray-300 peer-focus:ring-2 peer-focus:ring-red-300 transition-all duration-200 flex items-center justify-center">
+                            {selectedReviews.includes(review.id) && (
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </div>
+                        </label>
+                      </div>
+                    )}
+                    <div className="flex-shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-gray-600 overflow-hidden flex-shrink-0 border-2 border-gray-500">
+                        {review.userEmail ? (
+                          <img
+                            src={`https://www.gravatar.com/avatar/${md5(
+                              (review.userEmail || "").trim().toLowerCase(),
+                            )}?s=80&d=identicon`}
+                            alt="avatar"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : null}
+                        <div className={`w-full h-full flex items-center justify-center text-white font-medium text-sm ${
+                          review.userEmail ? 'hidden' : ''
+                        }`}>
+                          {(review.userName || "A").charAt(0).toUpperCase()}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-semibold text-sm">{review.userName || "Anonymous"}</span>
+                        <div className="text-yellow-500">
+                          {"★".repeat(review.rating)}
+                          {"☆".repeat(5 - review.rating)}
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {new Date(review.date).toLocaleDateString()}
+                        </span>
+                      </div>
+                      {review.comment && (
+                        <p className="text-gray-700">{review.comment}</p>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Add Review Form */}
+            {user && (
+              <div className="border-t pt-4">
+                <h4 className="font-semibold mb-2">Leave a Review</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Rating</label>
+                    <select
+                      value={newReview.rating}
+                      onChange={(e) => setNewReview({...newReview, rating: parseInt(e.target.value)})}
+                      className="border rounded px-3 py-2 w-full"
+                    >
+                      {[5,4,3,2,1].map(num => (
+                        <option key={num} value={num}>{num} stars</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Comment (optional)</label>
+                    <textarea
+                      value={newReview.comment}
+                      onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                      className="border rounded px-3 py-2 w-full h-20 resize-none"
+                      placeholder="Share your experience..."
+                    />
+                  </div>
+                  <button
+                    onClick={submitReview}
+                    disabled={isSubmittingReview}
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+                  >
+                    {isSubmittingReview ? "Submitting..." : "Submit Review"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <Toast
         message={toast.message}
         show={toast.show}
