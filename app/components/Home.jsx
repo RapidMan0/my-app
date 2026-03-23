@@ -11,6 +11,7 @@ const Home = () => (
       textShadow: "2px 4px 15px rgba(0, 0, 0, 1)",
     }}
   >
+    <div className="absolute inset-0 bg-black/15"></div>
     <img
       src="/retro-clothes-barbershop-stylish.2e16d0ba.fill-1920x1080.jpg"
       alt="Retro barbershop"
@@ -18,7 +19,7 @@ const Home = () => (
       fetchPriority="high"
       decoding="async"
     />
-    <div className=" p-8 rounded-lg space-y-3 mt-6 ml-4 sm:ml-6 md:ml-10 lg:ml-16 xl:ml-20">
+    <div className=" p-8 rounded-lg space-y-3 mt-6 ml-4 sm:ml-6 md:ml-10 lg:ml-16 xl:ml-20 relative z-10">
       <h1 className="text-5xl md:text-6xl font-bold">Sharp Men</h1>
       <p className="text-lg">BECOME A MEMBER</p>
       <p className="text-lg">WITH PATRICK POTTER</p>

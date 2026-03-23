@@ -77,7 +77,8 @@ const BookingSidebar = () => {
   } = useSelector((state) => state.booking);
 
   const [showReviewsModal, setShowReviewsModal] = useState(false);
-  const [selectedBarberForReviews, setSelectedBarberForReviews] = useState(null);
+  const [selectedBarberForReviews, setSelectedBarberForReviews] =
+    useState(null);
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: "" });
   const [selectedReviews, setSelectedReviews] = useState([]);
@@ -136,10 +137,10 @@ const BookingSidebar = () => {
         setReviews(data.reviews); // Используем обновленные отзывы с userName
         setNewReview({ rating: 5, comment: "" });
         // Обновляем барберов в store
-        const updatedBarbers = barbers.map(b =>
+        const updatedBarbers = barbers.map((b) =>
           b.id === selectedBarberForReviews.id
             ? { ...b, averageRating: data.averageRating, reviews: data.reviews }
-            : b
+            : b,
         );
         dispatch(setBarbers(updatedBarbers));
       }
@@ -171,10 +172,10 @@ const BookingSidebar = () => {
         setReviews(data.reviews);
         setSelectedReviews([]);
         // Обновляем барберов в store
-        const updatedBarbers = barbers.map(b =>
+        const updatedBarbers = barbers.map((b) =>
           b.id === selectedBarberForReviews.id
             ? { ...b, averageRating: data.averageRating, reviews: data.reviews }
-            : b
+            : b,
         );
         dispatch(setBarbers(updatedBarbers));
       }
@@ -185,10 +186,10 @@ const BookingSidebar = () => {
   };
 
   const handleReviewSelect = (reviewId) => {
-    setSelectedReviews(prev =>
+    setSelectedReviews((prev) =>
       prev.includes(reviewId)
-        ? prev.filter(id => id !== reviewId)
-        : [...prev, reviewId]
+        ? prev.filter((id) => id !== reviewId)
+        : [...prev, reviewId],
     );
   };
 
@@ -457,13 +458,16 @@ const BookingSidebar = () => {
             {selectedBarber ? "← Back" : "×"}
           </button>
         </div>
-        {barbers.map((barber) => (
+        {(selectedBarber
+          ? barbers.filter((b) => b.id === selectedBarber.id)
+          : barbers
+        ).map((barber) => (
           <div
             key={barber.id}
             className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${
               selectedBarber?.id === barber.id
                 ? "border-red-500"
-                : "border-gray-200"
+                : "border-gray-200 hover:border-red-400"
             }`}
             onClick={() => {
               dispatch(setSelectedBarber(barber));
@@ -488,7 +492,8 @@ const BookingSidebar = () => {
                     {"★".repeat(Math.floor(barber.averageRating || 0))}
                     {"☆".repeat(5 - Math.floor(barber.averageRating || 0))}{" "}
                     <span className="text-gray-500">
-                      {barber.averageRating || 0} ({(barber.reviews || []).length} reviews)
+                      {barber.averageRating || 0} (
+                      {(barber.reviews || []).length} reviews)
                     </span>
                   </p>
                   <button
@@ -511,28 +516,30 @@ const BookingSidebar = () => {
 
             {selectedBarber?.id === barber.id && (
               <>
-                <div className="mt-4">
-                  <h3 className="text-xl font-semibold mb-2">
-                    Choose a Service:
-                  </h3>
+                <div className="mt-3">
+                  <h3 className="text-base font-semibold mb-1.5">Services:</h3>
                   {services.map((service) => (
                     <div
                       key={service.id}
-                      className={`cursor-pointer flex flex-col gap-2 border rounded-xl p-4 mb-4 shadow-sm transition ${
+                      className={`cursor-pointer flex flex-col border-2 rounded p-3 mb-1.5 shadow-md transition hover:shadow-lg ${
                         selectedService?.id === service.id
-                          ? "border-red-500"
-                          : "border-gray-200"
+                          ? "border-red-500 bg-red-50"
+                          : "border-gray-300 hover:border-blue-400 hover:bg-blue-50"
                       }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         dispatch(setSelectedService(service));
                       }}
                     >
-                      <p className="font-semibold">{service.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {service.description}
-                      </p>
-                      <p className="text-sm font-bold text-blue-500">
+                      <div>
+                        <p className="font-semibold text-base">
+                          {service.name}
+                        </p>
+                        <p className="text-xs text-gray-500 mb-2">
+                          {service.description}
+                        </p>
+                      </div>
+                      <p className="text-lg font-bold text-blue-600">
                         {service.price}
                       </p>
                     </div>
@@ -722,7 +729,7 @@ const BookingSidebar = () => {
           </form>
         )}
       </motion.aside>
-      
+
       {/* Reviews Modal */}
       {showReviewsModal && selectedBarberForReviews && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
@@ -742,14 +749,18 @@ const BookingSidebar = () => {
             {/* Existing Reviews */}
             <div className="mb-6">
               <div className="flex justify-between items-center mb-2">
-                <h4 className="font-semibold">Customer Reviews ({reviews.length})</h4>
+                <h4 className="font-semibold">
+                  Customer Reviews ({reviews.length})
+                </h4>
                 {user?.isAdmin && selectedReviews.length > 0 && (
                   <button
                     onClick={deleteSelectedReviews}
                     disabled={isDeletingReviews}
                     className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 disabled:opacity-50"
                   >
-                    {isDeletingReviews ? "Deleting..." : `Delete (${selectedReviews.length})`}
+                    {isDeletingReviews
+                      ? "Deleting..."
+                      : `Delete (${selectedReviews.length})`}
                   </button>
                 )}
               </div>
@@ -757,7 +768,10 @@ const BookingSidebar = () => {
                 <p className="text-gray-500">No reviews yet.</p>
               ) : (
                 reviews.map((review, index) => (
-                  <div key={review.id} className={`flex gap-3 ${index < reviews.length - 1 ? 'border-b border-gray-200 pb-3 mb-3' : 'pb-3'}`}>
+                  <div
+                    key={review.id}
+                    className={`flex gap-3 ${index < reviews.length - 1 ? "border-b border-gray-200 pb-3 mb-3" : "pb-3"}`}
+                  >
                     {user?.isAdmin && (
                       <div className="flex-shrink-0 pt-1">
                         <label className="relative inline-flex items-center cursor-pointer">
@@ -769,8 +783,16 @@ const BookingSidebar = () => {
                           />
                           <div className="w-5 h-5 bg-gray-200 border-2 border-gray-300 rounded peer-checked:bg-red-500 peer-checked:border-red-500 peer-hover:bg-gray-300 peer-focus:ring-2 peer-focus:ring-red-300 transition-all duration-200 flex items-center justify-center">
                             {selectedReviews.includes(review.id) && (
-                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              <svg
+                                className="w-3 h-3 text-white"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                  clipRule="evenodd"
+                                />
                               </svg>
                             )}
                           </div>
@@ -787,21 +809,25 @@ const BookingSidebar = () => {
                             alt="avatar"
                             className="w-full h-full object-cover"
                             onError={(e) => {
-                              e.target.style.display = 'none';
-                              e.target.nextSibling.style.display = 'flex';
+                              e.target.style.display = "none";
+                              e.target.nextSibling.style.display = "flex";
                             }}
                           />
                         ) : null}
-                        <div className={`w-full h-full flex items-center justify-center text-white font-medium text-sm ${
-                          review.userEmail ? 'hidden' : ''
-                        }`}>
+                        <div
+                          className={`w-full h-full flex items-center justify-center text-white font-medium text-sm ${
+                            review.userEmail ? "hidden" : ""
+                          }`}
+                        >
                           {(review.userName || "A").charAt(0).toUpperCase()}
                         </div>
                       </div>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-semibold text-sm">{review.userName || "Anonymous"}</span>
+                        <span className="font-semibold text-sm">
+                          {review.userName || "Anonymous"}
+                        </span>
                         <div className="text-yellow-500">
                           {"★".repeat(review.rating)}
                           {"☆".repeat(5 - review.rating)}
@@ -825,22 +851,35 @@ const BookingSidebar = () => {
                 <h4 className="font-semibold mb-2">Leave a Review</h4>
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium mb-1">Rating</label>
+                    <label className="block text-sm font-medium mb-1">
+                      Rating
+                    </label>
                     <select
                       value={newReview.rating}
-                      onChange={(e) => setNewReview({...newReview, rating: parseInt(e.target.value)})}
+                      onChange={(e) =>
+                        setNewReview({
+                          ...newReview,
+                          rating: parseInt(e.target.value),
+                        })
+                      }
                       className="border rounded px-3 py-2 w-full"
                     >
-                      {[5,4,3,2,1].map(num => (
-                        <option key={num} value={num}>{num} stars</option>
+                      {[5, 4, 3, 2, 1].map((num) => (
+                        <option key={num} value={num}>
+                          {num} stars
+                        </option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">Comment (optional)</label>
+                    <label className="block text-sm font-medium mb-1">
+                      Comment (optional)
+                    </label>
                     <textarea
                       value={newReview.comment}
-                      onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
+                      onChange={(e) =>
+                        setNewReview({ ...newReview, comment: e.target.value })
+                      }
                       className="border rounded px-3 py-2 w-full h-20 resize-none"
                       placeholder="Share your experience..."
                     />
