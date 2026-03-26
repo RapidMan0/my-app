@@ -1,4 +1,4 @@
-import { findRefreshTokenByToken, revokeRefreshTokenById } from '../../../../lib/prisma.js'
+import { deleteRefreshTokenByToken } from '../../../../lib/prisma.js'
 
 function parseCookies(cookieHeader) {
   if (!cookieHeader) return {}
@@ -13,9 +13,10 @@ export async function POST(req) {
   const cookies = parseCookies(cookieHeader)
   const token = cookies.refreshToken
   if (token) {
-    const stored = await findRefreshTokenByToken(token)
-    if (stored) {
-      await revokeRefreshTokenById(stored.id)
+    try {
+      await deleteRefreshTokenByToken(token)
+    } catch (error) {
+      // Token might already be deleted, that's fine
     }
   }
 

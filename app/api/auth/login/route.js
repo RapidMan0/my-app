@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
-import { findUserByEmail, createRefreshToken } from "../../../../lib/prisma.js";
+import { findUserByEmail, createRefreshToken, deleteAllRefreshTokensByUserId } from "../../../../lib/prisma.js";
 import { signAccessToken, REFRESH_EXPIRES_DAYS } from "../../../../lib/auth.js";
 
 function makeRefreshCookie(token, maxAgeSec) {
@@ -39,6 +39,10 @@ export async function POST(req) {
 
   const accessToken = signAccessToken({ id: user.id, email: user.email });
 
+  // Delete any existing refresh tokens for this user
+  await deleteAllRefreshTokensByUserId(user.id);
+
+  // Create a new refresh token
   const refreshToken = crypto.randomUUID();
   const expiresAt = new Date(
     Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000

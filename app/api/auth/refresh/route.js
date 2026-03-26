@@ -1,7 +1,7 @@
 import {
   findRefreshTokenByToken,
   createRefreshToken,
-  revokeRefreshTokenById,
+  deleteAllRefreshTokensByUserId,
   getUserById,
 } from "../../../../lib/prisma.js";
 import { signAccessToken, REFRESH_EXPIRES_DAYS } from "../../../../lib/auth.js";
@@ -54,8 +54,8 @@ export async function POST(req) {
       headers: { "Content-Type": "application/json" },
     });
 
-  // rotate tokens: revoke old, create new
-  await revokeRefreshTokenById(stored.id);
+  // Delete old refresh token and create new one
+  await deleteAllRefreshTokensByUserId(user.id);
   const newToken = crypto.randomUUID();
   const expiresAt = new Date(
     Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000
