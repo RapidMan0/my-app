@@ -71,7 +71,7 @@ body {
   position: fixed;
   z-index: 9999;
   left: 16px;
-  bottom: 80px;
+  bottom: 24px;
 }
 .accessibility-button {
   background: #111827;
