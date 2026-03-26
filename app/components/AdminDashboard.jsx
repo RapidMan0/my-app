@@ -30,6 +30,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [selectedService, setSelectedService] = useState("");
+  const [selectedBarber, setSelectedBarber] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [toast, setToast] = useState({
@@ -210,11 +212,28 @@ const AdminDashboard = () => {
   };
 
   const getFilteredBookings = () => {
-    if (filter === "all") return bookings;
-    if (filter === "today") return bookings.filter((b) => isToday(b.date));
-    if (filter === "upcoming") return bookings.filter((b) => isUpcoming(b.date));
-    if (filter === "past") return bookings.filter((b) => isPast(b.date));
-    return bookings;
+    let result = bookings;
+
+    // Apply date filter
+    if (filter === "today") {
+      result = result.filter((b) => isToday(b.date));
+    } else if (filter === "upcoming") {
+      result = result.filter((b) => isUpcoming(b.date));
+    } else if (filter === "past") {
+      result = result.filter((b) => isPast(b.date));
+    }
+
+    // Apply service filter
+    if (selectedService) {
+      result = result.filter((b) => b.service === selectedService);
+    }
+
+    // Apply barber filter
+    if (selectedBarber) {
+      result = result.filter((b) => b.barber === selectedBarber);
+    }
+
+    return result;
   };
 
   const filteredBookings = getFilteredBookings();
@@ -226,7 +245,24 @@ const AdminDashboard = () => {
   // Reset to page 1 when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter]);
+  }, [filter, selectedService, selectedBarber]);
+
+  // Get unique services and barbers from bookings
+  const uniqueServices = useMemo(() => {
+    const services = new Set();
+    bookings.forEach((b) => {
+      if (b.service) services.add(b.service);
+    });
+    return Array.from(services).sort();
+  }, [bookings]);
+
+  const uniqueBarbers = useMemo(() => {
+    const barbers = new Set();
+    bookings.forEach((b) => {
+      if (b.barber) barbers.add(b.barber);
+    });
+    return Array.from(barbers).sort();
+  }, [bookings]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -397,7 +433,16 @@ const AdminDashboard = () => {
         )}
 
         <StatisticsCards stats={stats} />
-        <FilterButtons filter={filter} setFilter={setFilter} />
+        <FilterButtons
+          filter={filter}
+          setFilter={setFilter}
+          selectedService={selectedService}
+          setSelectedService={setSelectedService}
+          selectedBarber={selectedBarber}
+          setSelectedBarber={setSelectedBarber}
+          services={uniqueServices}
+          barbers={uniqueBarbers}
+        />
 
         {/* Bookings Table / Cards */}
         <motion.div
