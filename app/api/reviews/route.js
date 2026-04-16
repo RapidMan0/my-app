@@ -1,5 +1,6 @@
 import { verifyAccessToken } from "../../../lib/auth.js";
 import { getUserById } from "../../../lib/prisma.js";
+import { supabase } from "@/lib/supabase";
 
 export async function POST(req) {
   try {
@@ -46,97 +47,50 @@ export async function POST(req) {
       );
     }
 
-    // Получаем текущие данные барберов
-    const response = await fetch(
-      "https://api.jsonbin.io/v3/b/680b66408a456b7966910e72/latest",
-      {
-        headers: {
-          "X-Master-Key": "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
-        },
-      }
-    );
+    // Получаем барбера из Supabase
+    const { data: barber, error: fetchError } = await supabase
+      .from("barbers")
+      .select("*")
+      .eq("id", barberId)
+      .single();
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch barbers data");
-    }
-
-    const data = await response.json();
-    const barbers = data.record.barbers;
-
-    // Находим барбера
-    const barberIndex = barbers.findIndex(b => b.id === barberId);
-    if (barberIndex === -1) {
+    if (fetchError || !barber) {
       return new Response(
         JSON.stringify({ error: "Barber not found" }),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const barber = barbers[barberIndex];
-
-    // Инициализируем reviews если не существует
-    if (!barber.reviews) {
-      barber.reviews = [];
-    }
-
-    // Добавляем новый отзыв
+    // Создаем новый отзыв
     const newReview = {
       id: Date.now().toString(),
       userId: payload.id,
-      userName: user.name || user.email, // Используем name или email как fallback
-      userEmail: user.email, // Добавляем email для генерации Gravatar
-      userAvatar: user.avatar || null, // Если есть поле avatar, иначе null
+      userName: user.name || user.email,
+      userEmail: user.email,
+      userAvatar: user.avatar || null,
       rating: parseInt(rating),
       comment: comment || "",
       date: new Date().toISOString(),
     };
 
-    barber.reviews.push(newReview);
-
-    // Обновляем существующие отзывы, добавляя информацию о пользователях если отсутствует
-    const updatedReviews = await Promise.all(barber.reviews.map(async (review) => {
-      if (!review.userName || !review.userEmail) {
-        try {
-          const reviewUser = await getUserById(review.userId);
-          return {
-            ...review,
-            userName: reviewUser ? (reviewUser.name || reviewUser.email) : "Anonymous",
-            userEmail: reviewUser ? reviewUser.email : null,
-            userAvatar: reviewUser?.avatar || null,
-          };
-        } catch (error) {
-          return {
-            ...review,
-            userName: "Anonymous",
-            userEmail: null,
-            userAvatar: null,
-          };
-        }
-      }
-      return review;
-    }));
-
-    barber.reviews = updatedReviews;
+    // Добавляем отзыв
+    const updatedReviews = [...(barber.reviews || []), newReview];
 
     // Пересчитываем средний рейтинг
-    const totalRating = barber.reviews.reduce((sum, review) => sum + review.rating, 0);
-    barber.averageRating = (totalRating / barber.reviews.length).toFixed(1);
+    const totalRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0);
+    const newAverageRating = (totalRating / updatedReviews.length).toFixed(1);
 
-    // Обновляем данные в jsonbin
-    const updateResponse = await fetch(
-      "https://api.jsonbin.io/v3/b/680b66408a456b7966910e72",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Master-Key": "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
-        },
-        body: JSON.stringify({ barbers }),
-      }
-    );
+    // Обновляем барбера в Supabase
+    const { error: updateError } = await supabase
+      .from("barbers")
+      .update({
+        reviews: updatedReviews,
+        average_rating: newAverageRating,
+      })
+      .eq("id", barberId);
 
-    if (!updateResponse.ok) {
-      throw new Error("Failed to update barbers data");
+    if (updateError) {
+      throw updateError;
     }
 
     return new Response(
@@ -144,8 +98,8 @@ export async function POST(req) {
         success: true,
         message: "Review added successfully",
         review: newReview,
-        reviews: barber.reviews,
-        averageRating: barber.averageRating,
+        reviews: updatedReviews,
+        averageRating: newAverageRating,
       }),
       {
         status: 200,
@@ -177,26 +131,14 @@ export async function GET(req) {
       );
     }
 
-    // Получаем данные барберов
-    const response = await fetch(
-      "https://api.jsonbin.io/v3/b/680b66408a456b7966910e72/latest",
-      {
-        headers: {
-          "X-Master-Key": "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
-        },
-      }
-    );
+    // Получаем барбера из Supabase
+    const { data: barber, error: fetchError } = await supabase
+      .from("barbers")
+      .select("*")
+      .eq("id", parseInt(barberId))
+      .single();
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch barbers data");
-    }
-
-    const data = await response.json();
-    const barbers = data.record.barbers;
-
-    // Находим барбера
-    const barber = barbers.find(b => b.id === parseInt(barberId));
-    if (!barber) {
+    if (fetchError || !barber) {
       return new Response(
         JSON.stringify({ error: "Barber not found" }),
         { status: 404, headers: { "Content-Type": "application/json" } }
@@ -228,7 +170,7 @@ export async function GET(req) {
     return new Response(
       JSON.stringify({
         reviews: updatedReviews,
-        averageRating: barber.averageRating || 0,
+        averageRating: barber.average_rating || 0,
         totalReviews: updatedReviews.length,
       }),
       {
@@ -287,6 +229,8 @@ export async function DELETE(req) {
     const body = await req.json();
     const { barberId, reviewIds } = body;
 
+    console.log("[DELETE] Request body:", { barberId, reviewIds });
+
     if (!barberId || !reviewIds || !Array.isArray(reviewIds)) {
       return new Response(
         JSON.stringify({ error: "Invalid barberId or reviewIds" }),
@@ -294,68 +238,62 @@ export async function DELETE(req) {
       );
     }
 
-    // Получаем текущие данные барберов
-    const response = await fetch(
-      "https://api.jsonbin.io/v3/b/680b66408a456b7966910e72/latest",
-      {
-        headers: {
-          "X-Master-Key": "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
-        },
-      }
-    );
+    // Получаем барбера из Supabase
+    console.log("[DELETE] Fetching barber with id:", barberId);
+    const { data: barber, error: fetchError } = await supabase
+      .from("barbers")
+      .select("*")
+      .eq("id", barberId)
+      .single();
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch barbers data");
+    if (fetchError) {
+      console.error("[DELETE] Barber fetch error:", fetchError);
+    }
+    if (!barber) {
+      console.error("[DELETE] Barber not found for id:", barberId);
     }
 
-    const data = await response.json();
-    const barbers = data.record.barbers;
-
-    // Находим барбера
-    const barberIndex = barbers.findIndex(b => b.id === barberId);
-    if (barberIndex === -1) {
+    if (fetchError || !barber) {
       return new Response(
-        JSON.stringify({ error: "Barber not found" }),
+        JSON.stringify({ error: "Barber not found", details: fetchError?.message }),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const barber = barbers[barberIndex];
-
     // Фильтруем отзывы, удаляя выбранные
-    barber.reviews = barber.reviews.filter(review => !reviewIds.includes(review.id));
+    const updatedReviews = barber.reviews.filter(review => !reviewIds.includes(review.id));
 
     // Пересчитываем средний рейтинг
-    if (barber.reviews.length > 0) {
-      const totalRating = barber.reviews.reduce((sum, review) => sum + review.rating, 0);
-      barber.averageRating = (totalRating / barber.reviews.length).toFixed(1);
-    } else {
-      barber.averageRating = 0;
+    let newAverageRating = 0;
+    if (updatedReviews.length > 0) {
+      const totalRating = updatedReviews.reduce((sum, review) => sum + review.rating, 0);
+      newAverageRating = (totalRating / updatedReviews.length).toFixed(1);
     }
 
-    // Обновляем данные в jsonbin
-    const updateResponse = await fetch(
-      "https://api.jsonbin.io/v3/b/680b66408a456b7966910e72",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Master-Key": "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
-        },
-        body: JSON.stringify({ barbers }),
-      }
-    );
+    console.log("[DELETE] Updating barber reviews:", { barberId, newLength: updatedReviews.length, newAverageRating });
 
-    if (!updateResponse.ok) {
-      throw new Error("Failed to update barbers data");
+    // Обновляем барбера в Supabase
+    const { error: updateError } = await supabase
+      .from("barbers")
+      .update({
+        reviews: updatedReviews,
+        average_rating: newAverageRating,
+      })
+      .eq("id", barberId);
+
+    if (updateError) {
+      console.error("[DELETE] Supabase update error:", updateError);
+      throw updateError;
     }
+
+    console.log("[DELETE] Successfully updated barber");
 
     return new Response(
       JSON.stringify({
         success: true,
         message: "Reviews deleted successfully",
-        reviews: barber.reviews,
-        averageRating: barber.averageRating,
+        reviews: updatedReviews,
+        averageRating: newAverageRating,
       }),
       {
         status: 200,
@@ -364,9 +302,13 @@ export async function DELETE(req) {
     );
 
   } catch (error) {
-    console.error("Error deleting reviews:", error);
+    console.error("[DELETE] Error deleting reviews:", error.message, error);
     return new Response(
-      JSON.stringify({ error: "Failed to delete reviews" }),
+      JSON.stringify({ 
+        error: "Failed to delete reviews", 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }),
       {
         status: 500,
         headers: { "Content-Type": "application/json" },

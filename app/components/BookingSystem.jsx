@@ -241,45 +241,21 @@ const BookingSidebar = () => {
 
   // Fetch barbers and services data
   useEffect(() => {
-    const fetchBarbers = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(
-          "https://api.jsonbin.io/v3/b/680b66408a456b7966910e72/latest",
-          {
-            headers: {
-              "X-Master-Key":
-                "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
-            },
-          },
-        );
-        const json = await response.json();
-        dispatch(setBarbers(json.record.barbers));
+        console.time("Fetch data from Supabase");
+        const response = await fetch("/api/data");
+        const data = await response.json();
+
+        dispatch(setBarbers(data.barbers));
+        dispatch(setServices(data.services));
+        console.timeEnd("Fetch data from Supabase");
       } catch (error) {
-        console.error("Error fetching barbers:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    // Fetch services data
-    const fetchServices = async () => {
-      try {
-        const response = await fetch(
-          "https://api.jsonbin.io/v3/b/680b69788960c979a58cd355/latest",
-          {
-            headers: {
-              "X-Master-Key":
-                "$2a$10$FYW4gMZluUaf9SDRGEpXW.yZSQrB48u7PMzUJuXMBJQCg2POFP686",
-            },
-          },
-        );
-        const json = await response.json();
-        dispatch(setServices(json.record.services));
-      } catch (error) {
-        console.error("Error fetching services:", error);
-      }
-    };
-
-    fetchBarbers();
-    fetchServices();
+    fetchData();
   }, [dispatch]);
 
   // Handle scroll event to prevent background scrolling
@@ -621,7 +597,7 @@ const BookingSidebar = () => {
                       Choose a Time:
                     </label>
                     <div className="flex gap-2 flex-wrap">
-                      {barber.availableTimes.map((time, index) => (
+                      {(barber.availableTimes || []).map((time, index) => (
                         <button
                           key={index}
                           className={`px-3 py-1 rounded-full text-sm shadow ${
