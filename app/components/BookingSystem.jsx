@@ -502,9 +502,9 @@ const BookingSidebar = () => {
               <Image
                 src={barber.image}
                 alt={barber.name}
-                width={48}
-                height={48}
-                className="w-12 h-12 rounded-full object-cover"
+                width={80}
+                height={80}
+                className="w-20 h-20 rounded-full object-cover"
               />
               <div>
                 <p className="font-semibold text-lg">{barber.name}</p>
