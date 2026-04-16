@@ -23,22 +23,22 @@ const BookingsTable = ({
           <table className="w-full">
             <thead className="bg-gray-700 border-b border-gray-600">
               <tr>
-                <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                <th className="px-2 md:px-6 py-2 md:py-3 text-left text-gray-300 font-semibold text-sm md:text-base">
                   Client
                 </th>
-                <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                <th className="px-2 md:px-6 py-2 md:py-3 text-left text-gray-300 font-semibold text-sm md:text-base">
                   Service
                 </th>
-                <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                <th className="px-2 md:px-6 py-2 md:py-3 text-left text-gray-300 font-semibold text-sm md:text-base hidden lg:table-cell">
                   Barber
                 </th>
-                <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                <th className="px-2 md:px-6 py-2 md:py-3 text-left text-gray-300 font-semibold text-sm md:text-base">
                   Date & Time
                 </th>
-                <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                <th className="px-2 md:px-6 py-2 md:py-3 text-left text-gray-300 font-semibold text-sm md:text-base">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-gray-300 font-semibold">
+                <th className="px-2 md:px-6 py-2 md:py-3 text-left text-gray-300 font-semibold text-sm md:text-base">
                   Action
                 </th>
               </tr>
@@ -52,41 +52,41 @@ const BookingsTable = ({
                   transition={{ delay: index * 0.05 }}
                   className="border-b border-gray-700 hover:bg-gray-750 transition-colors"
                 >
-                  <td className="px-6 py-4 text-gray-300">
+                  <td className="px-2 md:px-6 py-2 md:py-4 text-white">
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-semibold text-sm md:text-base">
                         {booking.clientName ||
                           booking.name ||
                           booking.user?.name ||
                           (booking.email || "").split("@")[0] ||
                           "Unknown"}
                       </p>
-                      <p className="text-sm text-gray-400">
+                      <p className="text-xs md:text-sm text-gray-300">
                         {booking.email || booking.user?.email || "—"}
                       </p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
+                  <td className="px-2 md:px-6 py-2 md:py-4 text-white text-sm md:text-base">
                     {booking.service}
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
+                  <td className="px-2 md:px-6 py-2 md:py-4 text-white text-sm md:text-base hidden lg:table-cell">
                     {booking.barber}
                   </td>
-                  <td className="px-6 py-4 text-gray-300">
+                  <td className="px-2 md:px-6 py-2 md:py-4 text-white text-sm md:text-base">
                     {new Date(booking.date).toLocaleDateString("en-GB")}{" "}
                     {booking.time}
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-2 md:px-6 py-2 md:py-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${getStatusColor(booking.status)}`}
+                      className={`px-2 md:px-3 py-1 rounded-full text-xs md:text-sm font-semibold ${getStatusColor(booking.status)}`}
                     >
                       {getStatusText(booking.status)}
                     </span>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-2 md:px-6 py-2 md:py-4">
                     <button
                       onClick={() => onSelectBooking(booking)}
-                      className="text-blue-400 hover:text-blue-300 font-semibold transition-colors"
+                      className="text-blue-400 hover:text-blue-300 font-semibold text-sm md:text-base transition-colors"
                     >
                       Details
                     </button>
@@ -117,7 +117,7 @@ const BookingsTable = ({
                     (booking.email || "").split("@")[0] ||
                     "Unknown"}
                 </p>
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-300">
                   {booking.email || booking.user?.email || "—"}
                 </p>
               </div>

@@ -28,6 +28,7 @@ import {
   setDiscount,
   setFinalPrice,
   setToast,
+  updateBarber,
   resetBooking,
 } from "../../store/bookingSlice";
 
@@ -97,27 +98,47 @@ const BookingSidebar = () => {
     emailjs.init("TWMGobjrMR-dkenWF"); // ваш Public Key
   }, []);
 
-  const openReviewsModal = async (barber) => {
+  const openReviewsModal = (barber) => {
     setSelectedBarberForReviews(barber);
     setSelectedReviews([]); // Сбрасываем выбранные отзывы
-    try {
-      const response = await fetch(`/api/reviews?barberId=${barber.id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data.reviews || []);
-      } else {
-        setReviews([]);
-      }
-    } catch (error) {
-      console.error("Error fetching reviews:", error);
-    }
+    setReviews(barber.reviews || []);
     setShowReviewsModal(true);
   };
 
   const submitReview = async () => {
-    if (!newReview.rating || !accessToken) return;
+    if (!newReview.rating || !accessToken || !selectedBarberForReviews) return;
 
     setIsSubmittingReview(true);
+
+    const barber = barbers.find(b => b.id === selectedBarberForReviews.id);
+    if (!barber) return;
+
+    // Создаем новый отзыв
+    const newReviewData = {
+      id: Date.now().toString(),
+      userId: user.id,
+      userName: user.name || user.email,
+      userEmail: user.email,
+      userAvatar: user.avatar || null,
+      rating: newReview.rating,
+      comment: newReview.comment,
+      date: new Date().toISOString(),
+    };
+
+    // Оптимистичное обновление
+    const updatedReviews = [...(barber.reviews || []), newReviewData];
+    const totalRating = updatedReviews.reduce((sum, r) => sum + r.rating, 0);
+    const newAverageRating = (totalRating / updatedReviews.length).toFixed(1);
+
+    // Обновляем состояние
+    dispatch(updateBarber({ id: barber.id, reviews: updatedReviews, averageRating: newAverageRating }));
+    setReviews(updatedReviews);
+    setNewReview({ rating: 5, comment: "" });
+    showToast("Review added successfully!", "success");
+
+    setIsSubmittingReview(false);
+
+    // Фоновый запрос к API
     try {
       const response = await fetch("/api/reviews", {
         method: "POST",
@@ -132,28 +153,50 @@ const BookingSidebar = () => {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data.reviews); // Используем обновленные отзывы с userName
-        setNewReview({ rating: 5, comment: "" });
-        // Обновляем барберов в store
-        const updatedBarbers = barbers.map((b) =>
-          b.id === selectedBarberForReviews.id
-            ? { ...b, averageRating: data.averageRating, reviews: data.reviews }
-            : b,
-        );
-        dispatch(setBarbers(updatedBarbers));
+      if (!response.ok) {
+        throw new Error("Failed to submit review");
       }
+
+      const data = await response.json();
+      // Обновляем с актуальными данными из API
+      dispatch(updateBarber({ id: barber.id, reviews: data.reviews, averageRating: data.averageRating }));
+      setReviews(data.reviews);
     } catch (error) {
       console.error("Error submitting review:", error);
+      // Откатываем изменения
+      const revertedReviews = barber.reviews || [];
+      const revertedTotal = revertedReviews.reduce((sum, r) => sum + r.rating, 0);
+      const revertedAverage = revertedReviews.length > 0 ? (revertedTotal / revertedReviews.length).toFixed(1) : 0;
+      dispatch(updateBarber({ id: barber.id, reviews: revertedReviews, averageRating: revertedAverage }));
+      setReviews(revertedReviews);
+      showToast("Failed to add review. Please try again.", "error");
     }
-    setIsSubmittingReview(false);
   };
 
   const deleteSelectedReviews = async () => {
-    if (selectedReviews.length === 0 || !accessToken) return;
+    if (selectedReviews.length === 0 || !accessToken || !selectedBarberForReviews) return;
 
     setIsDeletingReviews(true);
+
+    const barber = barbers.find(b => b.id === selectedBarberForReviews.id);
+    if (!barber) return;
+
+    const reviewsToDelete = [...selectedReviews]; // Сохраняем для API
+
+    // Оптимистичное обновление
+    const updatedReviews = (barber.reviews || []).filter(review => !reviewsToDelete.includes(review.id));
+    const totalRating = updatedReviews.reduce((sum, r) => sum + r.rating, 0);
+    const newAverageRating = updatedReviews.length > 0 ? (totalRating / updatedReviews.length).toFixed(1) : 0;
+
+    // Обновляем состояние
+    dispatch(updateBarber({ id: barber.id, reviews: updatedReviews, averageRating: newAverageRating }));
+    setReviews(updatedReviews);
+    setSelectedReviews([]);
+    showToast("Reviews deleted successfully!", "success");
+
+    setIsDeletingReviews(false);
+
+    // Фоновый запрос к API
     try {
       const response = await fetch("/api/reviews", {
         method: "DELETE",
@@ -163,26 +206,29 @@ const BookingSidebar = () => {
         },
         body: JSON.stringify({
           barberId: selectedBarberForReviews.id,
-          reviewIds: selectedReviews,
+          reviewIds: reviewsToDelete,
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data.reviews);
-        setSelectedReviews([]);
-        // Обновляем барберов в store
-        const updatedBarbers = barbers.map((b) =>
-          b.id === selectedBarberForReviews.id
-            ? { ...b, averageRating: data.averageRating, reviews: data.reviews }
-            : b,
-        );
-        dispatch(setBarbers(updatedBarbers));
+      if (!response.ok) {
+        throw new Error("Failed to delete reviews");
       }
+
+      const data = await response.json();
+      // Обновляем с актуальными данными из API
+      dispatch(updateBarber({ id: barber.id, reviews: data.reviews, averageRating: data.averageRating }));
+      setReviews(data.reviews);
     } catch (error) {
       console.error("Error deleting reviews:", error);
+      // Откатываем изменения
+      const revertedReviews = barber.reviews || [];
+      const revertedTotal = revertedReviews.reduce((sum, r) => sum + r.rating, 0);
+      const revertedAverage = revertedReviews.length > 0 ? (revertedTotal / revertedReviews.length).toFixed(1) : 0;
+      dispatch(updateBarber({ id: barber.id, reviews: revertedReviews, averageRating: revertedAverage }));
+      setReviews(revertedReviews);
+      setSelectedReviews(reviewsToDelete); // Восстанавливаем выбранные
+      showToast("Failed to delete reviews. Please try again.", "error");
     }
-    setIsDeletingReviews(false);
   };
 
   const handleReviewSelect = (reviewId) => {

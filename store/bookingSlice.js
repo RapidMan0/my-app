@@ -68,6 +68,12 @@ const bookingSlice = createSlice({
     setToast: (state, action) => {
       state.toast = action.payload;
     },
+    updateBarber: (state, action) => {
+      const index = state.barbers.findIndex(b => b.id === action.payload.id);
+      if (index !== -1) {
+        state.barbers[index] = { ...state.barbers[index], ...action.payload };
+      }
+    },
     resetBooking: (state) => {
       state.selectedBarber = null;
       state.selectedService = null;
@@ -97,6 +103,7 @@ export const {
   setDiscount,
   setFinalPrice,
   setToast,
+  updateBarber,
   resetBooking,
 } = bookingSlice.actions;
 

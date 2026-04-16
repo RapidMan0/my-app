@@ -12,7 +12,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${roboto.className} ${playfair.variable}`}>
+    <html lang="en" className={`${roboto.className} ${playfair.variable}`} data-scroll-behavior="smooth">
       <body>
         <Providers>
           {children}
