@@ -450,6 +450,21 @@ const BookingSidebar = () => {
         </button>
       )}
 
+      {/* Backdrop overlay */}
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={() => {
+            dispatch(setIsOpen(false));
+            dispatch(setShowBookingButton(true));
+          }}
+          className="fixed inset-0 bg-black bg-opacity-50 z-30"
+        />
+      )}
+
       <motion.aside
         id="booking-sidebar"
         initial={{ x: "100%" }}
@@ -754,8 +769,21 @@ const BookingSidebar = () => {
 
       {/* Reviews Modal */}
       {showReviewsModal && selectedBarberForReviews && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]">
-          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={() => setShowReviewsModal(false)}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[10000]"
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto mx-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
                 Reviews for {selectedBarberForReviews.name}
@@ -916,8 +944,8 @@ const BookingSidebar = () => {
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       <Toast
