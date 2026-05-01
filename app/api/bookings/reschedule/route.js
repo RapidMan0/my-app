@@ -64,7 +64,7 @@ export async function POST(req) {
   const updatedBooking = await updateBooking(bookingId, {
     date,
     time,
-    status: "confirmed",
+    status: "rescheduled",
     notes: notes || `Перенесено с ${booking.date} ${booking.time} администратором`,
   });
 

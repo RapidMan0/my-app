@@ -110,7 +110,7 @@ const BookingSidebar = () => {
 
     setIsSubmittingReview(true);
 
-    const barber = barbers.find(b => b.id === selectedBarberForReviews.id);
+    const barber = barbers.find((b) => b.id === selectedBarberForReviews.id);
     if (!barber) return;
 
     // Создаем новый отзыв
@@ -131,7 +131,13 @@ const BookingSidebar = () => {
     const newAverageRating = (totalRating / updatedReviews.length).toFixed(1);
 
     // Обновляем состояние
-    dispatch(updateBarber({ id: barber.id, reviews: updatedReviews, averageRating: newAverageRating }));
+    dispatch(
+      updateBarber({
+        id: barber.id,
+        reviews: updatedReviews,
+        averageRating: newAverageRating,
+      }),
+    );
     setReviews(updatedReviews);
     setNewReview({ rating: 5, comment: "" });
     showToast("Review added successfully!", "success");
@@ -159,37 +165,71 @@ const BookingSidebar = () => {
 
       const data = await response.json();
       // Обновляем с актуальными данными из API
-      dispatch(updateBarber({ id: barber.id, reviews: data.reviews, averageRating: data.averageRating }));
+      dispatch(
+        updateBarber({
+          id: barber.id,
+          reviews: data.reviews,
+          averageRating: data.averageRating,
+        }),
+      );
       setReviews(data.reviews);
     } catch (error) {
       console.error("Error submitting review:", error);
       // Откатываем изменения
       const revertedReviews = barber.reviews || [];
-      const revertedTotal = revertedReviews.reduce((sum, r) => sum + r.rating, 0);
-      const revertedAverage = revertedReviews.length > 0 ? (revertedTotal / revertedReviews.length).toFixed(1) : 0;
-      dispatch(updateBarber({ id: barber.id, reviews: revertedReviews, averageRating: revertedAverage }));
+      const revertedTotal = revertedReviews.reduce(
+        (sum, r) => sum + r.rating,
+        0,
+      );
+      const revertedAverage =
+        revertedReviews.length > 0
+          ? (revertedTotal / revertedReviews.length).toFixed(1)
+          : 0;
+      dispatch(
+        updateBarber({
+          id: barber.id,
+          reviews: revertedReviews,
+          averageRating: revertedAverage,
+        }),
+      );
       setReviews(revertedReviews);
       showToast("Failed to add review. Please try again.", "error");
     }
   };
 
   const deleteSelectedReviews = async () => {
-    if (selectedReviews.length === 0 || !accessToken || !selectedBarberForReviews) return;
+    if (
+      selectedReviews.length === 0 ||
+      !accessToken ||
+      !selectedBarberForReviews
+    )
+      return;
 
     setIsDeletingReviews(true);
 
-    const barber = barbers.find(b => b.id === selectedBarberForReviews.id);
+    const barber = barbers.find((b) => b.id === selectedBarberForReviews.id);
     if (!barber) return;
 
     const reviewsToDelete = [...selectedReviews]; // Сохраняем для API
 
     // Оптимистичное обновление
-    const updatedReviews = (barber.reviews || []).filter(review => !reviewsToDelete.includes(review.id));
+    const updatedReviews = (barber.reviews || []).filter(
+      (review) => !reviewsToDelete.includes(review.id),
+    );
     const totalRating = updatedReviews.reduce((sum, r) => sum + r.rating, 0);
-    const newAverageRating = updatedReviews.length > 0 ? (totalRating / updatedReviews.length).toFixed(1) : 0;
+    const newAverageRating =
+      updatedReviews.length > 0
+        ? (totalRating / updatedReviews.length).toFixed(1)
+        : 0;
 
     // Обновляем состояние
-    dispatch(updateBarber({ id: barber.id, reviews: updatedReviews, averageRating: newAverageRating }));
+    dispatch(
+      updateBarber({
+        id: barber.id,
+        reviews: updatedReviews,
+        averageRating: newAverageRating,
+      }),
+    );
     setReviews(updatedReviews);
     setSelectedReviews([]);
     showToast("Reviews deleted successfully!", "success");
@@ -216,15 +256,33 @@ const BookingSidebar = () => {
 
       const data = await response.json();
       // Обновляем с актуальными данными из API
-      dispatch(updateBarber({ id: barber.id, reviews: data.reviews, averageRating: data.averageRating }));
+      dispatch(
+        updateBarber({
+          id: barber.id,
+          reviews: data.reviews,
+          averageRating: data.averageRating,
+        }),
+      );
       setReviews(data.reviews);
     } catch (error) {
       console.error("Error deleting reviews:", error);
       // Откатываем изменения
       const revertedReviews = barber.reviews || [];
-      const revertedTotal = revertedReviews.reduce((sum, r) => sum + r.rating, 0);
-      const revertedAverage = revertedReviews.length > 0 ? (revertedTotal / revertedReviews.length).toFixed(1) : 0;
-      dispatch(updateBarber({ id: barber.id, reviews: revertedReviews, averageRating: revertedAverage }));
+      const revertedTotal = revertedReviews.reduce(
+        (sum, r) => sum + r.rating,
+        0,
+      );
+      const revertedAverage =
+        revertedReviews.length > 0
+          ? (revertedTotal / revertedReviews.length).toFixed(1)
+          : 0;
+      dispatch(
+        updateBarber({
+          id: barber.id,
+          reviews: revertedReviews,
+          averageRating: revertedAverage,
+        }),
+      );
       setReviews(revertedReviews);
       setSelectedReviews(reviewsToDelete); // Восстанавливаем выбранные
       showToast("Failed to delete reviews. Please try again.", "error");
@@ -243,13 +301,11 @@ const BookingSidebar = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.time("Fetch data from Supabase");
         const response = await fetch("/api/data");
         const data = await response.json();
 
         dispatch(setBarbers(data.barbers));
         dispatch(setServices(data.services));
-        console.timeEnd("Fetch data from Supabase");
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -279,10 +335,19 @@ const BookingSidebar = () => {
   };
 
   // Calculate discount based on haircut count
+  // 🔑 Скидки доступны ТОЛЬКО для авторизованных пользователей
   useEffect(() => {
-    if (!selectedService || !user) {
+    if (!selectedService) {
       dispatch(setDiscount({ percent: 0, amount: 0, message: "" }));
       dispatch(setFinalPrice(0));
+      return;
+    }
+
+    // Если пользователь НЕ авторизован - скидок нет
+    if (!user || !accessToken) {
+      const priceNum = parseFloat(selectedService.price.replace(/[^\d.]/g, ""));
+      dispatch(setDiscount({ percent: 0, amount: 0, message: "" }));
+      dispatch(setFinalPrice(Math.round(priceNum)));
       return;
     }
 
@@ -324,7 +389,7 @@ const BookingSidebar = () => {
       }),
     );
     dispatch(setFinalPrice(Math.round(final)));
-  }, [selectedService, user, dispatch]);
+  }, [selectedService, user, accessToken, dispatch]);
 
   const onSubmit = async (data) => {
     // Оптимистично закрываем UI сразу
@@ -340,49 +405,87 @@ const BookingSidebar = () => {
 
     // Выполняем сетевые операции в фоне, не блокируя UI
     (async () => {
-      // Сохранение брони на сервере, если пользователь авторизован
-      if (user && accessToken) {
-        try {
-          const res = await fetch("/api/bookings/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({
-              barber: selectedBarber.name,
-              service: selectedService.name,
-              date: selectedDate,
-              time: selectedTime,
-              email: data.email,
-              phone: data.phone,
-              price: `${finalPrice} mdl`,
-              originalPrice: selectedService.price,
-              discount: discount.percent,
-            }),
-          });
-          if (!res.ok) {
-            const err = await res.json().catch(() => ({}));
-            showToast(err.error || "Failed to create booking", "error");
-            return;
-          }
+      try {
+        // Подготавливаем данные для отправки
+        const bookingData = {
+          barber: selectedBarber.name,
+          service: selectedService.name,
+          date: selectedDate,
+          time: selectedTime,
+          email: data.email,
+          phone: data.phone,
+          price: `${finalPrice} mdl`,
+          originalPrice: selectedService.price,
+          discount: discount.percent,
+        };
 
-          // Получаем обновленного пользователя из ответа сервера
-          const responseData = await res.json();
-          showToast(`Booking confirmed! ${discount.message}`, "success");
-          dispatch(resetBooking());
+        // Если пользователь авторизован - сохраняем в БД с его профилем
+        if (user && accessToken) {
+          try {
+            const res = await fetch("/api/bookings/create", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify(bookingData),
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              showToast(err.error || "Failed to create booking", "error");
+              return;
+            }
 
-          // 🔑 Обновляем пользователя (включая usedDiscounts)
-          if (updateUser && responseData.user) {
-            await updateUser(responseData.user);
+            // Получаем обновленного пользователя из ответа сервера
+            const responseData = await res.json();
+            showToast(`Booking confirmed! ${discount.message}`, "success");
+            dispatch(resetBooking());
+
+            // 🔑 Обновляем пользователя (включая usedDiscounts)
+            if (updateUser && responseData.user) {
+              await updateUser(responseData.user);
+            }
+          } catch (err) {
+            console.error("Save booking error:", err);
+            showToast("Network error while saving booking", "error");
           }
-        } catch (err) {
-          console.error("Save booking error:", err);
-          showToast("Network error while saving booking", "error");
+        } else {
+          // Неавторизованный пользователь - отправляем БЕЗ токена
+          // Скидка НЕ применяется для неавторизованных пользователей
+          const unauthorizedBookingData = {
+            ...bookingData,
+            discount: 0, // 🔑 Обнуляем скидку для неавторизованных
+          };
+
+          try {
+            const res = await fetch("/api/bookings/create", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(unauthorizedBookingData),
+            });
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              showToast(err.error || "Failed to create booking", "error");
+              return;
+            }
+
+            showToast(
+              "Booking confirmed! To enjoy discounts, please sign up.",
+              "success",
+            );
+            dispatch(resetBooking());
+          } catch (err) {
+            console.error("Save booking error:", err);
+            showToast("Network error while saving booking", "error");
+          }
         }
+      } catch (error) {
+        console.error("Submit error:", error);
       }
 
-      // Отправка email (тоже в фоне)
+      // Отправка email (для всех пользователей)
       try {
         const templateParams = {
           barber: selectedBarber.name,
@@ -657,16 +760,28 @@ const BookingSidebar = () => {
           >
             {/* Discount info */}
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+              {/* Предупреждение для неавторизованных пользователей */}
+              {(!user || !accessToken) && (
+                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
+                  <p className="text-sm text-yellow-800 font-semibold">
+                    💡 Sign up to unlock discounts!
+                  </p>
+                  <p className="text-xs text-yellow-700 mt-1">
+                    Get 10% at 3 visits, 15% at 6 visits, and 20% at 10 visits.
+                  </p>
+                </div>
+              )}
+
               <div className="flex justify-between items-center mb-2">
                 <span className="text-sm font-medium text-gray-700">
                   Total visits:
                 </span>
                 <span className="text-lg font-bold text-blue-600">
-                  {visits}
+                  {user ? visits : "0 (Sign up to track)"}
                 </span>
               </div>
 
-              {discount.percent > 0 ? (
+              {user && accessToken && discount.percent > 0 ? (
                 <>
                   <div className="flex justify-between items-center">
                     <span className="text-sm font-medium text-gray-700">
@@ -697,7 +812,8 @@ const BookingSidebar = () => {
                     {discount.message}
                   </div>
                 </>
-              ) : (
+              ) : user && accessToken ? (
+                // Авторизованный пользователь, но нет активной скидки
                 nextTarget && (
                   <div className="bg-blue-100 p-3 rounded-lg mt-3 mb-3">
                     <p className="text-sm text-blue-800 font-medium flex items-center gap-2">
@@ -711,7 +827,7 @@ const BookingSidebar = () => {
                     </p>
                   </div>
                 )
-              )}
+              ) : null}
 
               <div className="flex justify-between items-center mt-3 pt-3 border-t border-blue-200">
                 <span className="text-lg font-bold text-gray-900">Price:</span>
@@ -783,7 +899,8 @@ const BookingSidebar = () => {
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto mx-4">
+            className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto mx-4"
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-bold">
                 Reviews for {selectedBarberForReviews.name}

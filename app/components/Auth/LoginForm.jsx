@@ -45,10 +45,6 @@ export default function LoginForm({ onClose }) {
         <input
           {...register("password", {
             required: "Password is required",
-            minLength: {
-              value: 6,
-              message: "Password must be at least 6 characters",
-            },
           })}
           className="w-full border px-2 py-1 focus:outline-none focus:ring-2 focus:ring-red-400 transition"
           placeholder="Password"

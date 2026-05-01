@@ -38,7 +38,7 @@ const RescheduleModal = ({
             value={data.date}
             min={new Date().toISOString().split("T")[0]}
             onChange={(e) => onDateChange(e.target.value)}
-            className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none"
+            className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none [color-scheme:dark]"
           />
           {error && (
             <div className="text-red-400 mt-2 text-sm">{error}</div>
@@ -53,7 +53,7 @@ const RescheduleModal = ({
             type="time"
             value={data.time}
             onChange={(e) => onTimeChange(e.target.value)}
-            className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none"
+            className="w-full bg-gray-700 text-white rounded px-3 py-2 border border-gray-600 focus:border-blue-500 outline-none [color-scheme:dark]"
           />
         </div>
 

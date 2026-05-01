@@ -8,13 +8,63 @@ import {
 
 export async function POST(req) {
   const auth = req.headers.get("authorization");
-  if (!auth) {
+  const body = await req.json();
+  const { barber, service, date, time, email, phone, discount } = body || {};
+
+  // Валидация обязательных полей
+  if (!barber || !service || !date || !time || !email || !phone) {
     return new Response(
-      JSON.stringify({ error: "Missing Authorization header" }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ error: "Missing required booking fields" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
+  // Проверка валидности email и телефона
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return new Response(
+      JSON.stringify({ error: "Invalid email format" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  const phoneRegex = /^[0-9]{8,15}$/;
+  if (!phoneRegex.test(phone)) {
+    return new Response(
+      JSON.stringify({ error: "Invalid phone number" }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // Если авторизация отсутствует - это неавторизованный пользователь
+  if (!auth) {
+    // Создаем бронирование для неавторизованного пользователя
+    // userId будет null, но данные сохранятся в БД
+    const booking = await createBooking(null, {
+      barber,
+      service,
+      date,
+      time,
+      email,
+      phone,
+      status: "confirmed",
+    });
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Booking created successfully",
+        isAuthenticated: false,
+        booking,
+      }),
+      {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
+  // Обработка авторизованного пользователя
   const parts = auth.split(" ");
   const token = parts.length === 2 ? parts[1] : null;
   if (!token) {
@@ -38,16 +88,6 @@ export async function POST(req) {
       status: 404,
       headers: { "Content-Type": "application/json" },
     });
-  }
-
-  const body = await req.json();
-  const { barber, service, date, time, email, phone, discount } = body || {};
-
-  if (!barber || !service || !date || !time || !email || !phone) {
-    return new Response(
-      JSON.stringify({ error: "Missing required booking fields" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
   }
 
   // Определяем текущий активный порог скидки
@@ -98,6 +138,7 @@ export async function POST(req) {
     JSON.stringify({
       success: true,
       message: "Booking created successfully",
+      isAuthenticated: true,
       user: respUser,
       booking: booking,
     }),

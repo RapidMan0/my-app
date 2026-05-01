@@ -32,8 +32,8 @@ model RefreshToken {
 
 model Booking {
   id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
   barber    String
   service   String
   date      String

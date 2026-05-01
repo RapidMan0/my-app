@@ -82,7 +82,7 @@ const BookingDetailsModal = ({
           )}
         </div>
 
-        {booking.status === "confirmed" && (
+        {(booking.status === "confirmed" || booking.status === "rescheduled") && (
           <div className="flex gap-3 mb-4">
             <button
               onClick={() => onReschedule(booking)}
