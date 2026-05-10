@@ -82,19 +82,21 @@ const BookingDetailsModal = ({
           )}
         </div>
 
-        {(booking.status === "confirmed" || booking.status === "rescheduled") && (
+        {(booking.status === "pending" || booking.status === "confirmed" || booking.status === "rescheduled") && (
           <div className="flex gap-3 mb-4">
-            <button
-              onClick={() => onReschedule(booking)}
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              Reschedule
-            </button>
+            {(booking.status === "confirmed" || booking.status === "rescheduled") && (
+              <button
+                onClick={() => onReschedule(booking)}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                Reschedule
+              </button>
+            )}
             <button
               onClick={() => onCancel(booking.id)}
-              className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              className={`${booking.status === "pending" ? "w-full" : "flex-1"} px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors`}
             >
-              Cancel
+              Delete
             </button>
           </div>
         )}

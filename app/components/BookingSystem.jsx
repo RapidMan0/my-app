@@ -405,6 +405,8 @@ const BookingSidebar = () => {
 
     // Выполняем сетевые операции в фоне, не блокируя UI
     (async () => {
+      let bookingId = null;
+
       try {
         // Подготавливаем данные для отправки
         const bookingData = {
@@ -438,7 +440,8 @@ const BookingSidebar = () => {
 
             // Получаем обновленного пользователя из ответа сервера
             const responseData = await res.json();
-            showToast(`Booking confirmed! ${discount.message}`, "success");
+            bookingId = responseData.booking?.id;
+            showToast(`Booking pending confirmation. Check your email!`, "success");
             dispatch(resetBooking());
 
             // 🔑 Обновляем пользователя (включая usedDiscounts)
@@ -471,8 +474,10 @@ const BookingSidebar = () => {
               return;
             }
 
+            const responseData = await res.json();
+            bookingId = responseData.booking?.id;
             showToast(
-              "Booking confirmed! To enjoy discounts, please sign up.",
+              "Booking pending confirmation. Check your email!",
               "success",
             );
             dispatch(resetBooking());
@@ -487,6 +492,10 @@ const BookingSidebar = () => {
 
       // Отправка email (для всех пользователей)
       try {
+        const confirmLink = bookingId 
+          ? `${typeof window !== "undefined" ? window.location.origin : ""}/bookings/confirm/${bookingId}`
+          : null;
+
         const templateParams = {
           barber: selectedBarber.name,
           service: selectedService.name,
@@ -497,6 +506,7 @@ const BookingSidebar = () => {
           price: `${finalPrice} mdl`,
           originalPrice: selectedService.price,
           discount: discount.percent,
+          confirmLink: confirmLink || "",
         };
         await emailjs.send(
           "service_m48lm91",

@@ -47,7 +47,7 @@ export async function POST(req) {
       time,
       email,
       phone,
-      status: "confirmed",
+      status: "pending",
     });
 
     return new Response(
@@ -112,7 +112,7 @@ export async function POST(req) {
     time,
     email,
     phone,
-    status: "confirmed",
+    status: "pending",
   });
 
   // Increment haircut count
