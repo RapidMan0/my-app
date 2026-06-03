@@ -85,6 +85,8 @@ const BookingSidebar = () => {
   const [selectedReviews, setSelectedReviews] = useState([]);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [isDeletingReviews, setIsDeletingReviews] = useState(false);
+  const [bookedTimes, setBookedTimes] = useState([]);
+  const [isLoadingTimes, setIsLoadingTimes] = useState(false);
 
   const {
     register,
@@ -325,6 +327,40 @@ const BookingSidebar = () => {
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  // Fetch booked times for selected barber and date
+  useEffect(() => {
+    const fetchBookedTimes = async () => {
+      if (!selectedBarber || !selectedDate) {
+        setBookedTimes([]);
+        return;
+      }
+
+      setIsLoadingTimes(true);
+      try {
+        // Получаем имя барбера из объекта
+        const barberName = typeof selectedBarber === "string" ? selectedBarber : selectedBarber?.name;
+        const response = await fetch(
+          `/api/bookings/available-times?barberId=${encodeURIComponent(barberName)}&date=${selectedDate}`
+        );
+        const data = await response.json();
+
+        if (data.bookedTimes) {
+          setBookedTimes(data.bookedTimes);
+        } else {
+          setBookedTimes([]);
+        }
+      } catch (error) {
+        console.error("Error fetching booked times:", error);
+        setBookedTimes([]);
+      } finally {
+        setIsLoadingTimes(false);
+      }
+    };
+
+    fetchBookedTimes();
+  }, [selectedBarber, selectedDate]);
+
 
   const showToast = (message, type = "success") => {
     dispatch(setToast({ show: true, message, type }));
@@ -724,23 +760,39 @@ const BookingSidebar = () => {
                     <label className="block text-lg font-semibold mb-2">
                       Choose a Time:
                     </label>
+                    {isLoadingTimes && (
+                      <p className="text-sm text-gray-500 italic">
+                        Loading available times...
+                      </p>
+                    )}
                     <div className="flex gap-2 flex-wrap">
-                      {(barber.availableTimes || []).map((time, index) => (
-                        <button
-                          key={index}
-                          className={`px-3 py-1 rounded-full text-sm shadow ${
-                            selectedTime === time
-                              ? "bg-red-500 text-white"
-                              : "bg-gray-100"
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            dispatch(setSelectedTime(time));
-                          }}
-                        >
-                          {time}
-                        </button>
-                      ))}
+                      {(barber.availableTimes || []).map((time, index) => {
+                        const isBooked = bookedTimes.includes(time);
+                        const isSelected = selectedTime === time;
+
+                        return (
+                          <button
+                            key={index}
+                            disabled={isBooked}
+                            className={`px-3 py-1 rounded-full text-sm shadow transition-all ${
+                              isBooked
+                                ? "bg-gray-400 text-gray-600 cursor-not-allowed line-through opacity-75 font-medium"
+                                : isSelected
+                                  ? "bg-red-500 text-white hover:bg-red-600"
+                                  : "bg-gray-100 hover:bg-gray-200 cursor-pointer"
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isBooked) {
+                                dispatch(setSelectedTime(time));
+                              }
+                            }}
+                            title={isBooked ? "This time slot is already booked" : ""}
+                          >
+                            {time}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
